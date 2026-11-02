@@ -1,0 +1,169 @@
+"""
+Pengujian untuk src/analisis.py, src/negara.py, dan konsistensi data di folder data/.
+Jalankan:  python -m pytest tests/ -v
+"""
+
+import pandas as pd
+import pytest
+
+from src import analisis, muat_data
+from src.negara import PETA_NEGARA, iso3, nama_indonesia
+
+
+# ----------------------------------------------------------------------------
+# Data buatan kecil agar pengujian fungsi tidak bergantung pada CSV besar
+# ----------------------------------------------------------------------------
+@pytest.fixture
+def df_kecil() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "negara": ["A", "A", "A", "B", "B", "C"],
+            "iso3": ["AAA", "AAA", "AAA", "BBB", "BBB", "CCC"],
+            "wilayah": ["Asia", "Asia", "Asia", "Afrika", "Afrika", "Eropa"],
+            "tahun": [2020, 2021, 2021, 2020, 2021, 2021],
+            "jenis": ["Konflik negara", "Konflik negara", "Kekerasan sepihak", "Konflik non-negara", "Konflik negara", "Konflik negara"],
+            "status": ["final", "final", "final", "final", "awal", "final"],
+            "kejadian": [10, 20, 5, 3, 4, 1],
+            "korban": [100, 1500, 50, 30, 40, 0],
+            "korban_min": [90, 1200, 50, 30, 40, 0],
+            "korban_max": [150, 2000, 60, 35, 50, 1],
+            "korban_sipil": [10, 300, 50, 0, 0, 0],
+        }
+    )
+
+
+def test_filter_tahun_dan_jenis(df_kecil):
+    hasil = analisis.filter_data(df_kecil, 2021, 2021, ["Konflik negara"])
+    assert set(hasil["tahun"]) == {2021}
+    assert set(hasil["jenis"]) == {"Konflik negara"}
+    assert len(hasil) == 3
+
+
+def test_filter_buang_data_awal(df_kecil):
+    tanpa_awal = analisis.filter_data(df_kecil, 2000, 2030, sertakan_awal=False)
+    assert "awal" not in set(tanpa_awal["status"])
+    assert len(tanpa_awal) == len(df_kecil) - 1
+
+
+def test_filter_wilayah(df_kecil):
+    hasil = analisis.filter_data(df_kecil, 2000, 2030, wilayah=["Eropa"])
+    assert hasil["negara"].tolist() == ["C"]
+
+
+def test_ringkasan(df_kecil):
+    r = analisis.ringkasan(df_kecil)
+    assert r["korban"] == 1720
+    assert r["kejadian"] == 43
+    assert r["negara"] == 2  # C punya 0 korban, tidak dihitung
+    assert r["negara_tertinggi"] == "A" and r["korban_tertinggi"] == 1650
+    assert r["tahun_terburuk"] == 2021
+
+
+def test_ringkasan_kosong(df_kecil):
+    r = analisis.ringkasan(df_kecil.iloc[0:0])
+    assert r["korban"] == 0 and r["negara_tertinggi"] == "-"
+
+
+def test_per_tahun_dan_kelompok(df_kecil):
+    total = analisis.per_tahun(df_kecil)
+    assert total.set_index("tahun")["korban"].to_dict() == {2020: 130, 2021: 1590}
+    per_jenis = analisis.per_tahun(df_kecil, "jenis")
+    baris = per_jenis[(per_jenis["tahun"] == 2021) & (per_jenis["jenis"] == "Konflik negara")]
+    assert int(baris["korban"].iloc[0]) == 1540
+
+
+def test_top_negara_urut_dan_peringkat(df_kecil):
+    top = analisis.top_negara(df_kecil, 2)
+    assert top["negara"].tolist() == ["A", "B"]
+    assert top["peringkat"].tolist() == [1, 2]
+    top_kejadian = analisis.top_negara(df_kecil, 1, metrik="kejadian")
+    assert top_kejadian["negara"].iloc[0] == "A"
+
+
+def test_perubahan_tahunan(df_kecil):
+    p = analisis.perubahan_tahunan(df_kecil).set_index("tahun")
+    assert pd.isna(p.loc[2020, "selisih"])
+    assert p.loc[2021, "selisih"] == 1460
+    assert p.loc[2021, "perubahan_pct"] == pytest.approx(1460 / 130 * 100)
+
+
+def test_pangsa_sipil(df_kecil):
+    s = analisis.pangsa_sipil(df_kecil).set_index("tahun")
+    assert s.loc[2020, "pangsa_sipil_pct"] == pytest.approx(10 / 130 * 100)
+    assert s.loc[2021, "pangsa_sipil_pct"] == pytest.approx(350 / 1590 * 100)
+
+
+@pytest.mark.parametrize("korban,label", [(0, "Di bawah ambang"), (24, "Di bawah ambang"), (25, "Konflik minor"), (999, "Konflik minor"), (1000, "Perang"), (50000, "Perang")])
+def test_kategori_intensitas(korban, label):
+    assert analisis.kategori_intensitas(korban) == label
+
+
+def test_peta_negara_buang_nol(df_kecil):
+    p = analisis.peta_negara(df_kecil)
+    assert "C" not in set(p["negara"])
+    assert p.iloc[0]["negara"] == "A" and p.iloc[0]["intensitas"] == "Perang"
+
+
+def test_profil_negara(df_kecil):
+    konflik = pd.DataFrame(
+        {
+            "konflik": ["A: Government", "A: Government", "X - Civilians"],
+            "jenis": ["Konflik negara", "Konflik negara", "Kekerasan sepihak"],
+            "tahun": [2020, 2021, 2021],
+            "status": ["final"] * 3,
+            "kejadian": [10, 20, 5],
+            "korban": [100, 1500, 50],
+            "korban_sipil": [10, 300, 50],
+            "negara_utama": ["A", "A", "A"],
+        }
+    )
+    p = analisis.profil_negara(df_kecil, konflik, "A")
+    assert p["korban"] == 1650 and p["tahun_puncak"] == 2021 and p["korban_puncak"] == 1550
+    assert p["tahun_aktif"] == 2
+    assert p["konflik"]["konflik"].tolist() == ["A: Government", "X - Civilians"]
+    assert p["konflik"].iloc[0]["tahun_awal"] == 2020 and p["konflik"].iloc[0]["tahun_akhir"] == 2021
+
+
+# ----------------------------------------------------------------------------
+# Pemetaan negara
+# ----------------------------------------------------------------------------
+def test_pemetaan_negara():
+    assert iso3("DR Congo (Zaire)") == "COD"
+    assert nama_indonesia("Myanmar (Burma)") == "Myanmar"
+    assert iso3("Negara Tidak Ada") == ""
+    assert nama_indonesia("Negara Tidak Ada") == "Negara Tidak Ada"
+    kode = [v[0] for v in PETA_NEGARA.values()]
+    assert len(kode) == len(set(kode)), "kode ISO-3 harus unik"
+    assert all(len(k) == 3 and k.isupper() for k in kode)
+
+
+# ----------------------------------------------------------------------------
+# Data sungguhan di folder data/
+# ----------------------------------------------------------------------------
+def test_dataset_bisa_dimuat():
+    nt = muat_data.muat_negara_tahun()
+    grid = muat_data.muat_grid()
+    konflik = muat_data.muat_konflik()
+    assert nt["tahun"].min() == 1989 and nt["tahun"].max() >= 2025
+    assert (nt["iso3"].str.len() == 3).all(), "setiap negara harus punya kode ISO-3"
+    assert set(nt["jenis"]) == set(muat_data.URUTAN_JENIS)
+    assert grid["lat"].between(-90, 90).all() and grid["lon"].between(-180, 180).all()
+    assert set(konflik["status"]) <= {"final", "awal"}
+
+
+def test_total_korban_konsisten_antar_tabel():
+    """Ketiga tabel berasal dari kejadian yang sama, jadi total per tahun harus identik."""
+    nt = muat_data.muat_negara_tahun().groupby("tahun")["korban"].sum()
+    grid = muat_data.muat_grid().groupby("tahun")["korban"].sum()
+    konflik = muat_data.muat_konflik().groupby("tahun")["korban"].sum()
+    pd.testing.assert_series_equal(nt, grid, check_names=False)
+    pd.testing.assert_series_equal(nt, konflik, check_names=False)
+
+
+def test_angka_acuan_ucdp():
+    """Angka yang dikenal luas: genosida Rwanda 1994 adalah tahun paling mematikan dalam data."""
+    nt = muat_data.muat_negara_tahun()
+    per_tahun = nt.groupby("tahun")["korban"].sum()
+    assert per_tahun.idxmax() == 1994
+    rwanda_1994 = nt[(nt["negara"] == "Rwanda") & (nt["tahun"] == 1994)]["korban"].sum()
+    assert rwanda_1994 > 500_000
