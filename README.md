@@ -6,9 +6,19 @@
 > dan ke mana arahnya. Dibangun dengan Python, pandas, Plotly, dan Streamlit di atas data terbuka
 > **UCDP Georeferenced Event Dataset**.
 
-*An interactive tracker of armed conflict worldwide, 1989–2026: a choropleth and event map, casualty trends by
-type of violence and region, and a per-country drill-down, built on the open UCDP Georeferenced Event Dataset
-(417,968 events) plus UCDP Candidate data for 2026. Python, pandas, Plotly, Streamlit.*
+## 🇬🇧 In English
+
+**Is the world getting bloodier?** An interactive tracker of armed conflict worldwide from 1989 to 2026: a choropleth and event map, casualty trends by type of violence and region, and a per-country drill-down, built on 417,968 events from the open UCDP Georeferenced Event Dataset plus UCDP Candidate data for 2026.
+
+- **Map** deaths or events per country, or as 0.5° grid cells colored by type of violence.
+- **Trend** casualties over time with low–high uncertainty bands and the civilian share.
+- **Drill down** into one country: yearly deaths against the 1,000-death war threshold, and its main conflicts.
+
+**Built with:** Python, pandas, NumPy, Plotly, Streamlit  
+**Data:** UCDP Georeferenced Event Dataset and UCDP Candidate Events (Uppsala University)  
+**Engineering:** Download → aggregate → visualize → test pipeline, pytest suite with CI on GitHub Actions
+
+*The rest of this README is in Indonesian.*
 
 **🔴 Live demo:** https://global-conflict-tracker.streamlit.app
 
