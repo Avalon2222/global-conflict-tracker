@@ -1,5 +1,7 @@
 # 🌍 Global Conflict Tracker
 
+[![tests](https://github.com/Avalon2222/global-conflict-tracker/actions/workflows/tests.yml/badge.svg)](https://github.com/Avalon2222/global-conflict-tracker/actions/workflows/tests.yml) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/) [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE) [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://global-conflict-tracker.streamlit.app)
+
 > Peta dan tren **konflik bersenjata di seluruh dunia** 1989–2026: di mana perang terjadi, seberapa mematikan,
 > dan ke mana arahnya. Dibangun dengan Python, pandas, Plotly, dan Streamlit di atas data terbuka
 > **UCDP Georeferenced Event Dataset**.
