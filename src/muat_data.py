@@ -14,10 +14,15 @@ FOLDER_DATA = Path(__file__).resolve().parent.parent / "data"
 URUTAN_JENIS = ["Konflik negara", "Konflik non-negara", "Kekerasan sepihak"]
 
 
+def _kolom_teks(kolom: pd.Series) -> bool:
+    """True untuk kolom teks. Di pandas 3 teks dibaca sebagai dtype `str`, bukan `object` lagi."""
+    return kolom.dtype == object or isinstance(kolom.dtype, pd.StringDtype)
+
+
 def _baca(nama_file: str) -> pd.DataFrame:
     df = pd.read_csv(FOLDER_DATA / nama_file)
     for kolom in df.columns:
-        if df[kolom].dtype == object:
+        if _kolom_teks(df[kolom]):
             df[kolom] = df[kolom].fillna("")
     return df
 
