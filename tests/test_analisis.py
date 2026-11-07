@@ -167,3 +167,11 @@ def test_angka_acuan_ucdp():
     assert per_tahun.idxmax() == 1994
     rwanda_1994 = nt[(nt["negara"] == "Rwanda") & (nt["tahun"] == 1994)]["korban"].sum()
     assert rwanda_1994 > 500_000
+
+
+def test_kolom_teks_kenal_dtype_pandas_3(tmp_path, monkeypatch):
+    (tmp_path / "uji.csv").write_text("negara,catatan,korban\nA,,1\nB,ok,2\n")
+    monkeypatch.setattr(muat_data, "FOLDER_DATA", tmp_path)
+    df = muat_data._baca("uji.csv")
+    assert df["catatan"].tolist() == ["", "ok"]       # sel kosong jadi "", bukan NaN
+    assert df["korban"].tolist() == [1, 2]            # kolom angka tidak disentuh
