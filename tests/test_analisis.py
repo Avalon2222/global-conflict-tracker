@@ -175,3 +175,20 @@ def test_kolom_teks_kenal_dtype_pandas_3(tmp_path, monkeypatch):
     df = muat_data._baca("uji.csv")
     assert df["catatan"].tolist() == ["", "ok"]       # sel kosong jadi "", bukan NaN
     assert df["korban"].tolist() == [1, 2]            # kolom angka tidak disentuh
+
+
+def test_konflik_teratas_menjumlah_lintas_tahun():
+    kt = pd.DataFrame(
+        {
+            "konflik": ["X", "X", "Y", "Z"],
+            "jenis": ["Konflik negara", "Konflik negara", "Kekerasan sepihak", "Konflik non-negara"],
+            "tahun": [2020, 2022, 2021, 2021],
+            "korban": [100, 300, 250, 5],
+            "kejadian": [4, 6, 9, 1],
+        }
+    )
+    hasil = analisis.konflik_teratas(kt, n=2)
+    assert list(hasil["konflik"]) == ["X", "Y"]     # X total 400 mengalahkan Y 250
+    x = hasil.iloc[0]
+    assert x["korban"] == 400 and x["kejadian"] == 10
+    assert (x["tahun_awal"], x["tahun_akhir"]) == (2020, 2022)

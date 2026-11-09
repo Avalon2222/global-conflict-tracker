@@ -77,3 +77,12 @@ def test_agregasi_konflik_negara_utama(mentah):
     # urut per tahun, lalu korban terbanyak dulu
     assert g["tahun"].is_monotonic_increasing
     assert g[g["tahun"] == 2024]["korban"].tolist() == [15, 3]
+
+
+def test_baca_kejadian_ambil_kolom_dan_tandai_status(mentah, tmp_path):
+    path = tmp_path / "ged.csv"
+    mentah.assign(kolom_lain="dibuang").to_csv(path, index=False)
+    df = siapkan_data.baca_kejadian(path, "awal")
+    assert set(df.columns) == set(siapkan_data.KOLOM) | {"status"}
+    assert (df["status"] == "awal").all()
+    assert len(df) == len(mentah)
