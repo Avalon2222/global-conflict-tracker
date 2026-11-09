@@ -86,3 +86,54 @@ def test_baca_kejadian_ambil_kolom_dan_tandai_status(mentah, tmp_path):
     assert set(df.columns) == set(siapkan_data.KOLOM) | {"status"}
     assert (df["status"] == "awal").all()
     assert len(df) == len(mentah)
+
+
+class _Respons:
+    def __init__(self, isi: bytes):
+        self.content = isi
+
+    def raise_for_status(self):
+        pass
+
+
+def _pasang_unduhan(monkeypatch, isi: bytes) -> list[str]:
+    import requests
+
+    diminta: list[str] = []
+
+    def palsu(url, timeout):
+        diminta.append(url)
+        return _Respons(isi)
+
+    monkeypatch.setattr(requests, "get", palsu)
+    return diminta
+
+
+def test_unduh_pakai_file_lokal_kalau_sudah_ada(monkeypatch, tmp_path):
+    diminta = _pasang_unduhan(monkeypatch, b"tidak dipakai")
+    tujuan = tmp_path / "ged.csv"
+    tujuan.write_text("lama", encoding="utf-8")
+    assert siapkan_data.unduh("https://contoh/ged.csv", tujuan) == tujuan
+    assert diminta == [] and tujuan.read_text(encoding="utf-8") == "lama"
+
+
+def test_unduh_ekstrak_dari_zip(monkeypatch, tmp_path):
+    import io
+    import zipfile
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("GEDEvent_v25_1.csv", "id,year\n1,2024\n")
+        z.writestr("README.txt", "abaikan")
+    _pasang_unduhan(monkeypatch, buf.getvalue())
+    tujuan = tmp_path / "raw" / "GEDEvent_v25_1.csv"
+    siapkan_data.unduh("https://contoh/ged.zip", tujuan)
+    assert tujuan.read_text(encoding="utf-8").startswith("id,year")
+    assert not (tmp_path / "raw" / "README.txt").exists()
+
+
+def test_unduh_csv_langsung(monkeypatch, tmp_path):
+    _pasang_unduhan(monkeypatch, b"id,year\n2,2026\n")
+    tujuan = tmp_path / "kandidat.csv"
+    siapkan_data.unduh("https://contoh/kandidat.csv", tujuan)
+    assert tujuan.read_bytes() == b"id,year\n2,2026\n"
