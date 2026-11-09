@@ -168,7 +168,9 @@ def main() -> None:
     agregasi_konflik(k).to_csv(FOLDER_DATA / "konflik_tahun.csv", index=False)
     for f in ("korban_negara_tahun.csv", "grid_kejadian.csv", "konflik_tahun.csv"):
         p = FOLDER_DATA / f
-        print(f"  {f}: {sum(1 for _ in open(p, encoding='utf-8')) - 1:,} baris, {p.stat().st_size / 1e6:.1f} MB")
+        with open(p, encoding="utf-8") as isi:
+            baris = sum(1 for _ in isi) - 1
+        print(f"  {f}: {baris:,} baris, {p.stat().st_size / 1e6:.1f} MB")
 
 
 if __name__ == "__main__":
