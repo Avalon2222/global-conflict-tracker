@@ -192,3 +192,20 @@ def test_konflik_teratas_menjumlah_lintas_tahun():
     x = hasil.iloc[0]
     assert x["korban"] == 400 and x["kejadian"] == 10
     assert (x["tahun_awal"], x["tahun_akhir"]) == (2020, 2022)
+
+
+def test_validasi_tolak_kolom_hilang_dan_file_kosong():
+    df = pd.DataFrame({"negara": ["Sudan"], "tahun": [2024]})
+    muat_data._validasi(df, ["negara", "tahun"], "uji.csv")   # lolos tanpa error
+    with pytest.raises(ValueError, match=r"uji.csv: kolom hilang -> \['korban'\]"):
+        muat_data._validasi(df, ["negara", "korban"], "uji.csv")
+    with pytest.raises(ValueError, match="file kosong"):
+        muat_data._validasi(df.iloc[0:0], ["negara"], "uji.csv")
+
+
+def test_muat_grid_dan_konflik_punya_kolom_wajib():
+    grid = muat_data.muat_grid()
+    assert grid["lat"].between(-90, 90).all() and grid["lon"].between(-180, 180).all()
+    konflik = muat_data.muat_konflik()
+    assert (konflik["korban"] >= 0).all()
+    assert not konflik["konflik"].eq("").any()
