@@ -11,6 +11,7 @@ untuk disimpan di repositori. Skrip ini mengagregasinya menjadi tiga tabel kecil
 Cara pakai:
     python -m src.siapkan_data                 # unduh dari ucdp.uu.se lalu olah
     python -m src.siapkan_data --folder-mentah data/raw   # pakai file yang sudah diunduh
+    python -m src.siapkan_data --folder-keluar /tmp/uji   # tulis CSV ke folder lain (data/ tidak tersentuh)
 
 Sumber (tanpa registrasi):
   - GED 26.1 (final, 1989-2025): https://ucdp.uu.se/downloads/ged/ged261-csv.zip
@@ -144,12 +145,15 @@ def agregasi_konflik(k: pd.DataFrame) -> pd.DataFrame:
     return g.merge(negara_utama, on=["konflik", "tahun"], how="left").sort_values(["tahun", "korban"], ascending=[True, False])
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--folder-mentah", default=str(FOLDER_DATA / "raw"), help="tempat file UCDP mentah disimpan")
+    ap.add_argument("--folder-keluar", default=str(FOLDER_DATA), help="tempat menulis 3 CSV hasil agregasi")
     ap.add_argument("--tanpa-kandidat", action="store_true", help="lewati data kandidat 2026")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     mentah = Path(args.folder_mentah)
+    keluar = Path(args.folder_keluar)
+    keluar.mkdir(parents=True, exist_ok=True)
 
     print("1/4 Menyiapkan file mentah")
     ged = unduh(URL_GED, mentah / NAMA_FILE_GED)
@@ -161,13 +165,13 @@ def main() -> None:
     print(f"  total {len(k):,} kejadian, {k['tahun'].min()}-{k['tahun'].max()}")
 
     print("2/4 Agregasi per negara-tahun")
-    agregasi_negara_tahun(k).to_csv(FOLDER_DATA / "korban_negara_tahun.csv", index=False)
+    agregasi_negara_tahun(k).to_csv(keluar / "korban_negara_tahun.csv", index=False)
     print("3/4 Agregasi grid untuk peta")
-    agregasi_grid(k).to_csv(FOLDER_DATA / "grid_kejadian.csv", index=False)
+    agregasi_grid(k).to_csv(keluar / "grid_kejadian.csv", index=False)
     print("4/4 Agregasi per konflik")
-    agregasi_konflik(k).to_csv(FOLDER_DATA / "konflik_tahun.csv", index=False)
+    agregasi_konflik(k).to_csv(keluar / "konflik_tahun.csv", index=False)
     for f in ("korban_negara_tahun.csv", "grid_kejadian.csv", "konflik_tahun.csv"):
-        p = FOLDER_DATA / f
+        p = keluar / f
         with open(p, encoding="utf-8") as isi:
             baris = sum(1 for _ in isi) - 1
         print(f"  {f}: {baris:,} baris, {p.stat().st_size / 1e6:.1f} MB")
