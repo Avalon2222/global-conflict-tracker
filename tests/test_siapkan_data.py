@@ -137,3 +137,63 @@ def test_unduh_csv_langsung(monkeypatch, tmp_path):
     tujuan = tmp_path / "kandidat.csv"
     siapkan_data.unduh("https://contoh/kandidat.csv", tujuan)
     assert tujuan.read_bytes() == b"id,year\n2,2026\n"
+
+
+def _tulis_mentah(df: pd.DataFrame, path) -> None:
+    df.drop(columns=["status"]).assign(kolom_lain="x").to_csv(path, index=False)
+
+
+def test_main_dari_file_lokal(mentah, tmp_path, monkeypatch):
+    folder_mentah = tmp_path / "raw"
+    folder_mentah.mkdir()
+    _tulis_mentah(mentah[mentah["year"] == 2024], folder_mentah / siapkan_data.NAMA_FILE_GED)
+    _tulis_mentah(mentah[mentah["year"] == 2025], folder_mentah / siapkan_data.NAMA_FILE_KANDIDAT)
+    monkeypatch.setattr("requests.get", lambda *a, **k: pytest.fail("tidak boleh mengunduh"))
+
+    keluar = tmp_path / "keluar"
+    siapkan_data.main(["--folder-mentah", str(folder_mentah), "--folder-keluar", str(keluar)])
+
+    negara = pd.read_csv(keluar / "korban_negara_tahun.csv")
+    assert negara["korban"].sum() == mentah["best"].sum()
+    assert set(negara["status"]) == {"final", "awal"}
+    assert (keluar / "grid_kejadian.csv").exists()
+    konflik = pd.read_csv(keluar / "konflik_tahun.csv")
+    assert set(konflik["tahun"]) == {2024, 2025}
+
+
+def test_main_tanpa_kandidat(mentah, tmp_path):
+    folder_mentah = tmp_path / "raw"
+    folder_mentah.mkdir()
+    _tulis_mentah(mentah[mentah["year"] == 2024], folder_mentah / siapkan_data.NAMA_FILE_GED)
+
+    siapkan_data.main(["--folder-mentah", str(folder_mentah), "--folder-keluar", str(tmp_path), "--tanpa-kandidat"])
+
+    negara = pd.read_csv(tmp_path / "korban_negara_tahun.csv")
+    assert set(negara["tahun"]) == {2024}
+    assert set(negara["status"]) == {"final"}
+
+
+def test_unduh_pakai_file_lokal(tmp_path, monkeypatch):
+    f = tmp_path / "sudah_ada.csv"
+    f.write_text("isi")
+    monkeypatch.setattr("requests.get", lambda *a, **k: pytest.fail("tidak boleh mengunduh"))
+    assert siapkan_data.unduh("https://contoh/sudah_ada.csv", f) == f
+
+
+def test_unduh_ekstrak_zip(tmp_path, monkeypatch):
+    import io
+    import zipfile
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("ged.csv", "a,b\n1,2\n")
+
+    class Respons:
+        content = buf.getvalue()
+
+        def raise_for_status(self):
+            pass
+
+    monkeypatch.setattr("requests.get", lambda *a, **k: Respons())
+    hasil = siapkan_data.unduh("https://contoh/ged.zip", tmp_path / "raw" / "ged.csv")
+    assert hasil.read_text() == "a,b\n1,2\n"
