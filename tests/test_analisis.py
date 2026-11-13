@@ -209,3 +209,21 @@ def test_muat_grid_dan_konflik_punya_kolom_wajib():
     konflik = muat_data.muat_konflik()
     assert (konflik["korban"] >= 0).all()
     assert not konflik["konflik"].eq("").any()
+
+
+def _konflik_kosong():
+    return pd.DataFrame(columns=["konflik", "jenis", "tahun", "korban", "kejadian", "negara_utama"])
+
+
+def test_profil_negara_yang_tidak_ada_di_data(df_kecil):
+    p = analisis.profil_negara(df_kecil, _konflik_kosong(), "Negara Fiktif")
+    assert p["korban"] == 0 and p["kejadian"] == 0
+    assert p["tahun_puncak"] is None and p["korban_puncak"] == 0
+    assert p["tahun_aktif"] == 0 and p["konflik"].empty
+
+
+def test_peta_negara_buang_negara_tanpa_korban(df_kecil):
+    p = analisis.peta_negara(df_kecil)
+    assert "C" not in set(p["negara"])                     # korban 0
+    assert p["korban"].is_monotonic_decreasing
+    assert p.set_index("negara").loc["A", "intensitas"] == "Perang"   # 1650 korban
