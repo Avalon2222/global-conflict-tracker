@@ -227,3 +227,22 @@ def test_peta_negara_buang_negara_tanpa_korban(df_kecil):
     assert "C" not in set(p["negara"])                     # korban 0
     assert p["korban"].is_monotonic_decreasing
     assert p.set_index("negara").loc["A", "intensitas"] == "Perang"   # 1650 korban
+
+
+def test_konflik_teratas_gabung_tahun_dan_batasi_n():
+    k = pd.DataFrame({
+        "konflik": ["X", "X", "Y", "Z"],
+        "jenis": ["Konflik negara"] * 4,
+        "tahun": [2019, 2021, 2020, 2020],
+        "korban": [10, 30, 25, 5],
+        "kejadian": [1, 2, 3, 1],
+    })
+    t = analisis.konflik_teratas(k, n=2)
+    assert t["konflik"].tolist() == ["X", "Y"]
+    x = t.iloc[0]
+    assert x["korban"] == 40 and x["tahun_awal"] == 2019 and x["tahun_akhir"] == 2021
+
+
+def test_perubahan_tahunan_tahun_pertama_kosong(df_kecil):
+    p = analisis.perubahan_tahunan(df_kecil)
+    assert pd.isna(p["selisih"].iloc[0]) and pd.isna(p["perubahan_pct"].iloc[0])
