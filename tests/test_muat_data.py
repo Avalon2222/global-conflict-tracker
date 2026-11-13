@@ -28,3 +28,23 @@ def test_validasi_kolom_hilang_dan_file_kosong():
     with pytest.raises(ValueError, match="file kosong"):
         muat_data._validasi(pd.DataFrame(columns=["a"]), ["a"], "x.csv")
     muat_data._validasi(pd.DataFrame({"a": [1]}), ["a"], "x.csv")
+
+
+def test_tabel_negara_tahun_di_repo_konsisten():
+    df = muat_data.muat_negara_tahun()
+    assert set(df["jenis"]) <= set(muat_data.URUTAN_JENIS)
+    assert (df["korban"] >= 0).all() and (df["kejadian"] >= 0).all()
+    assert df["iso3"].str.len().eq(3).all()
+    # Satu baris per negara x tahun x jenis x status.
+    assert not df.duplicated(["negara", "tahun", "jenis", "status"]).any()
+
+
+def test_grid_dan_konflik_di_repo_masuk_akal():
+    grid = muat_data.muat_grid()
+    assert grid["lat"].between(-90, 90).all() and grid["lon"].between(-180, 180).all()
+    konflik = muat_data.muat_konflik()
+    assert set(konflik["jenis"]) <= set(muat_data.URUTAN_JENIS)
+    assert konflik["konflik"].ne("").all()
+    # Rentang tahun ketiga tabel sama, supaya filter tahun di dashboard berlaku seragam.
+    negara = muat_data.muat_negara_tahun()
+    assert grid["tahun"].max() == negara["tahun"].max() == konflik["tahun"].max()
