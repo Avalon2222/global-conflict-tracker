@@ -267,3 +267,9 @@ def test_peta_negara_tanpa_kolom_sipil(df_kecil):
     hasil = analisis.peta_negara(df_kecil.drop(columns=["korban_sipil"]))
     assert "korban_sipil" not in hasil.columns
     assert hasil["negara"].tolist() == ["A", "B"]
+
+
+def test_pemetaan_negara_abaikan_spasi_tepi():
+    assert iso3(" Ukraine ") == "UKR"
+    assert nama_indonesia("Ukraine ") == "Ukraina"
+    assert iso3("Negara Fiksi") == ""

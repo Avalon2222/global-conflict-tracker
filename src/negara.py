@@ -158,11 +158,16 @@ JENIS_KEKERASAN = {
 }
 
 
+def _rapikan(nama_ucdp):
+    """Buang spasi tepi supaya "Ukraine " tetap dikenali; nilai bukan teks dikembalikan apa adanya."""
+    return nama_ucdp.strip() if isinstance(nama_ucdp, str) else nama_ucdp
+
+
 def iso3(nama_ucdp: str) -> str:
     """Kode ISO-3 untuk nama negara UCDP; string kosong jika tidak dikenal."""
-    return PETA_NEGARA.get(nama_ucdp, ("", ""))[0]
+    return PETA_NEGARA.get(_rapikan(nama_ucdp), ("", ""))[0]
 
 
 def nama_indonesia(nama_ucdp: str) -> str:
     """Nama Indonesia; jika tidak dikenal, kembalikan nama aslinya."""
-    return PETA_NEGARA.get(nama_ucdp, ("", nama_ucdp))[1] or nama_ucdp
+    return PETA_NEGARA.get(_rapikan(nama_ucdp), ("", nama_ucdp))[1] or nama_ucdp
