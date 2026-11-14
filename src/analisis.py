@@ -27,6 +27,8 @@ def filter_data(
     `sertakan_awal=False` membuang baris berstatus "awal" (data kandidat UCDP
     yang belum melewati tinjauan akhir).
     """
+    if tahun_awal > tahun_akhir:
+        tahun_awal, tahun_akhir = tahun_akhir, tahun_awal  # rentang terbalik tetap dibaca wajar
     m = (df["tahun"] >= tahun_awal) & (df["tahun"] <= tahun_akhir)
     if jenis:
         m &= df["jenis"].isin(jenis)
