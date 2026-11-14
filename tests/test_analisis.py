@@ -261,3 +261,9 @@ def test_ringkasan_tanpa_korban_tidak_menunjuk_negara(df_kecil):
     assert r["tahun_terburuk"] is None
     assert r["korban_tertinggi"] == 0
     assert r["kejadian"] == int(df_kecil["kejadian"].sum())
+
+
+def test_peta_negara_tanpa_kolom_sipil(df_kecil):
+    hasil = analisis.peta_negara(df_kecil.drop(columns=["korban_sipil"]))
+    assert "korban_sipil" not in hasil.columns
+    assert hasil["negara"].tolist() == ["A", "B"]
