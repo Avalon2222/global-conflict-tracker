@@ -92,6 +92,11 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
             "status": df["status"],
         }
     )
+    # Kode kekerasan baru/tak dikenal jangan sampai jadi NaN: groupby membuang baris NaN diam-diam.
+    jenis_asing = sorted(df.loc[out["jenis"].isna(), "type_of_violence"].unique().tolist())
+    if jenis_asing:
+        print(f"  PERINGATAN: kode type_of_violence tidak dikenal -> {jenis_asing}", file=sys.stderr)
+        out["jenis"] = out["jenis"].fillna("Tidak diketahui")
     tanpa_iso = sorted(out.loc[out["iso3"] == "", "negara_ucdp"].unique())
     if tanpa_iso:
         print(f"  PERINGATAN: negara tanpa kode ISO-3 -> {tanpa_iso}", file=sys.stderr)

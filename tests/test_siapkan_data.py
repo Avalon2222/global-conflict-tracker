@@ -197,3 +197,12 @@ def test_unduh_ekstrak_zip(tmp_path, monkeypatch):
     monkeypatch.setattr("requests.get", lambda *a, **k: Respons())
     hasil = siapkan_data.unduh("https://contoh/ged.zip", tmp_path / "raw" / "ged.csv")
     assert hasil.read_text() == "a,b\n1,2\n"
+
+
+def test_rapikan_kejadian_jenis_tak_dikenal_tidak_hilang(mentah, capsys):
+    mentah.loc[3, "type_of_violence"] = 9
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert k.loc[3, "jenis"] == "Tidak diketahui"
+    assert "type_of_violence" in capsys.readouterr().err
+    g = siapkan_data.agregasi_negara_tahun(k)
+    assert g["korban"].sum() == mentah["best"].sum()      # tidak ada korban yang terbuang di groupby
