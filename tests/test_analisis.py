@@ -246,3 +246,9 @@ def test_konflik_teratas_gabung_tahun_dan_batasi_n():
 def test_perubahan_tahunan_tahun_pertama_kosong(df_kecil):
     p = analisis.perubahan_tahunan(df_kecil)
     assert pd.isna(p["selisih"].iloc[0]) and pd.isna(p["perubahan_pct"].iloc[0])
+
+
+def test_filter_rentang_tahun_terbalik_ditukar(df_kecil):
+    normal = analisis.filter_data(df_kecil, 2020, 2021)
+    terbalik = analisis.filter_data(df_kecil, 2021, 2020)
+    pd.testing.assert_frame_equal(normal, terbalik)
