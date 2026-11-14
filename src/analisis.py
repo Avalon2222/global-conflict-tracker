@@ -110,10 +110,10 @@ def kategori_intensitas(korban: int) -> str:
 
 def peta_negara(df: pd.DataFrame, metrik: str = "korban") -> pd.DataFrame:
     """Satu baris per negara untuk choropleth, lengkap dengan kategori intensitas."""
-    g = (
-        df.groupby(["negara", "iso3", "wilayah"], as_index=False)
-        .agg(korban=("korban", "sum"), kejadian=("kejadian", "sum"), korban_sipil=("korban_sipil", "sum"))
-    )
+    agg = {"korban": ("korban", "sum"), "kejadian": ("kejadian", "sum")}
+    if "korban_sipil" in df.columns:  # sama seperti per_tahun: kolom sipil opsional
+        agg["korban_sipil"] = ("korban_sipil", "sum")
+    g = df.groupby(["negara", "iso3", "wilayah"], as_index=False).agg(**agg)
     g["intensitas"] = g["korban"].apply(kategori_intensitas)
     g = g[g[metrik] > 0]
     return g.sort_values(metrik, ascending=False).reset_index(drop=True)
