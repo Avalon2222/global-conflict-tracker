@@ -252,3 +252,12 @@ def test_filter_rentang_tahun_terbalik_ditukar(df_kecil):
     normal = analisis.filter_data(df_kecil, 2020, 2021)
     terbalik = analisis.filter_data(df_kecil, 2021, 2020)
     pd.testing.assert_frame_equal(normal, terbalik)
+
+
+def test_ringkasan_tanpa_korban_tidak_menunjuk_negara(df_kecil):
+    nol = df_kecil.assign(korban=0)
+    r = analisis.ringkasan(nol)
+    assert r["negara_tertinggi"] == "-"
+    assert r["tahun_terburuk"] is None
+    assert r["korban_tertinggi"] == 0
+    assert r["kejadian"] == int(df_kecil["kejadian"].sum())

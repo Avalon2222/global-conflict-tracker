@@ -45,13 +45,15 @@ def ringkasan(df: pd.DataFrame) -> dict:
         return {"korban": 0, "kejadian": 0, "negara": 0, "negara_tertinggi": "-", "korban_tertinggi": 0, "tahun_terburuk": None, "korban_tahun_terburuk": 0}
     per_negara = df.groupby("negara")["korban"].sum().sort_values(ascending=False)
     per_tahun = df.groupby("tahun")["korban"].sum().sort_values(ascending=False)
+    # Kalau semua baris korbannya nol, tidak ada negara atau tahun yang pantas disebut "tertinggi".
+    ada_korban = per_negara.iloc[0] > 0
     return {
         "korban": int(df["korban"].sum()),
         "kejadian": int(df["kejadian"].sum()),
         "negara": int(df.loc[df["korban"] > 0, "negara"].nunique()),
-        "negara_tertinggi": str(per_negara.index[0]),
+        "negara_tertinggi": str(per_negara.index[0]) if ada_korban else "-",
         "korban_tertinggi": int(per_negara.iloc[0]),
-        "tahun_terburuk": int(per_tahun.index[0]),
+        "tahun_terburuk": int(per_tahun.index[0]) if ada_korban else None,
         "korban_tahun_terburuk": int(per_tahun.iloc[0]),
     }
 
