@@ -121,6 +121,8 @@ def agregasi_negara_tahun(k: pd.DataFrame) -> pd.DataFrame:
 
 def agregasi_grid(k: pd.DataFrame, resolusi: float = RESOLUSI_GRID) -> pd.DataFrame:
     """Kejadian dibulatkan ke sel grid agar peta ringan tetapi polanya tetap terlihat."""
+    if not resolusi > 0:
+        raise ValueError(f"resolusi grid harus lebih dari 0, dapat {resolusi}")
     sel = k.assign(
         lat=(k["lat"] / resolusi).round() * resolusi,
         lon=(k["lon"] / resolusi).round() * resolusi,

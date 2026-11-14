@@ -206,3 +206,10 @@ def test_rapikan_kejadian_jenis_tak_dikenal_tidak_hilang(mentah, capsys):
     assert "type_of_violence" in capsys.readouterr().err
     g = siapkan_data.agregasi_negara_tahun(k)
     assert g["korban"].sum() == mentah["best"].sum()      # tidak ada korban yang terbuang di groupby
+
+
+@pytest.mark.parametrize("resolusi", [0, -0.5])
+def test_agregasi_grid_tolak_resolusi_tidak_positif(mentah, resolusi):
+    k = siapkan_data.rapikan_kejadian(mentah)
+    with pytest.raises(ValueError, match="resolusi"):
+        siapkan_data.agregasi_grid(k, resolusi)
