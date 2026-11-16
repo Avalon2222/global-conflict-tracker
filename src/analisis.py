@@ -71,9 +71,12 @@ def per_tahun(df: pd.DataFrame, kolom_kelompok: str | None = None) -> pd.DataFra
 
 
 def top_negara(df: pd.DataFrame, n: int = 10, metrik: str = "korban") -> pd.DataFrame:
-    """N negara dengan jumlah korban (atau kejadian) terbanyak dalam data yang diberikan."""
+    """N negara dengan jumlah korban (atau kejadian) terbanyak dalam data yang diberikan.
+
+    Negara baru yang belum punya kode ISO-3 (iso3 kosong saat dibaca dari CSV) tetap ikut dihitung.
+    """
     g = (
-        df.groupby(["negara", "iso3", "wilayah"], as_index=False)
+        df.groupby(["negara", "iso3", "wilayah"], as_index=False, dropna=False)
         .agg(korban=("korban", "sum"), kejadian=("kejadian", "sum"))
         .sort_values(metrik, ascending=False)
         .head(n)
@@ -113,7 +116,7 @@ def peta_negara(df: pd.DataFrame, metrik: str = "korban") -> pd.DataFrame:
     agg = {"korban": ("korban", "sum"), "kejadian": ("kejadian", "sum")}
     if "korban_sipil" in df.columns:  # sama seperti per_tahun: kolom sipil opsional
         agg["korban_sipil"] = ("korban_sipil", "sum")
-    g = df.groupby(["negara", "iso3", "wilayah"], as_index=False).agg(**agg)
+    g = df.groupby(["negara", "iso3", "wilayah"], as_index=False, dropna=False).agg(**agg)
     g["intensitas"] = g["korban"].apply(kategori_intensitas)
     g = g[g[metrik] > 0]
     return g.sort_values(metrik, ascending=False).reset_index(drop=True)
