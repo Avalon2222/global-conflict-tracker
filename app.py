@@ -348,12 +348,13 @@ with tab_tren:
             fig.update_layout(title="Ketidakpastian estimasi: best vs low–high", yaxis_title="Korban jiwa")
             st.plotly_chart(rapikan(fig, 380), use_container_width=True)
         else:
-            perubahan = analisis.perubahan_tahunan(df)
+            # Hanya buang baris tanpa selisih (tahun pertama); persen boleh kosong saat tahun lalu 0.
+            perubahan = analisis.perubahan_tahunan(df).dropna(subset=["selisih"])
             fig = px.bar(
-                perubahan.dropna(),
+                perubahan,
                 x="tahun",
                 y="selisih",
-                color=perubahan.dropna()["selisih"] > 0,
+                color=perubahan["selisih"] > 0,
                 color_discrete_map={True: "#e0483e", False: "#5cb27c"},
                 title="Perubahan korban jiwa dari tahun sebelumnya",
                 labels={"tahun": "", "selisih": "Selisih korban"},
