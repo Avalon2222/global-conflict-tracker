@@ -79,6 +79,15 @@ def test_agregasi_konflik_negara_utama(mentah):
     assert g[g["tahun"] == 2024]["korban"].tolist() == [15, 3]
 
 
+def test_agregasi_konflik_negara_utama_saat_seri(mentah):
+    # Konflik lintas perbatasan: satu kejadian di Ukraina (10 korban), satu di Rusia (2 korban).
+    m = mentah.iloc[[0, 1]].copy()
+    m.loc[m.index[1], ["country", "best"]] = ["Russia", 2]
+    for urutan in (m, m.iloc[::-1]):
+        g = siapkan_data.agregasi_konflik(siapkan_data.rapikan_kejadian(urutan))
+        assert g.iloc[0]["negara_utama"] == "Ukraina"
+
+
 def test_baca_kejadian_ambil_kolom_dan_tandai_status(mentah, tmp_path):
     path = tmp_path / "ged.csv"
     mentah.assign(kolom_lain="dibuang").to_csv(path, index=False)

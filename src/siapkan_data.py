@@ -143,9 +143,11 @@ def agregasi_konflik(k: pd.DataFrame) -> pd.DataFrame:
         k.groupby(["konflik", "jenis", "tahun", "status"], as_index=False)
         .agg(kejadian=("korban", "size"), korban=("korban", "sum"), korban_sipil=("korban_sipil", "sum"))
     )
+    # Jumlah kejadian seri (konflik lintas perbatasan): pilih yang korbannya lebih banyak, lalu
+    # nama negara, supaya hasilnya tidak bergantung pada urutan baris di file mentah.
     negara_utama = (
-        k.groupby(["konflik", "tahun", "negara"]).size().reset_index(name="n")
-        .sort_values("n", ascending=False)
+        k.groupby(["konflik", "tahun", "negara"]).agg(n=("korban", "size"), korban=("korban", "sum")).reset_index()
+        .sort_values(["n", "korban", "negara"], ascending=[False, False, True], kind="mergesort")
         .drop_duplicates(["konflik", "tahun"])[["konflik", "tahun", "negara"]]
         .rename(columns={"negara": "negara_utama"})
     )
