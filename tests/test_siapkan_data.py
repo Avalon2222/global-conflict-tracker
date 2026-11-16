@@ -79,6 +79,17 @@ def test_agregasi_konflik_negara_utama(mentah):
     assert g[g["tahun"] == 2024]["korban"].tolist() == [15, 3]
 
 
+def test_rapikan_kejadian_angka_korban_kosong(mentah):
+    m = mentah.copy()
+    m["deaths_civilians"] = m["deaths_civilians"].astype(float)
+    m.loc[0, "deaths_civilians"] = float("nan")
+    m.loc[1, "high"] = None
+    k = siapkan_data.rapikan_kejadian(m)
+    assert k.loc[0, "korban_sipil"] == 0
+    assert k.loc[1, "korban_max"] == 0
+    assert k["korban"].tolist() == [10, 5, 3, 7]
+
+
 def test_agregasi_konflik_negara_utama_saat_seri(mentah):
     # Konflik lintas perbatasan: satu kejadian di Ukraina (10 korban), satu di Rusia (2 korban).
     m = mentah.iloc[[0, 1]].copy()
