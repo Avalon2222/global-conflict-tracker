@@ -70,6 +70,12 @@ def baca_kejadian(path: Path, status: str) -> pd.DataFrame:
     return df
 
 
+def _bilangan(kolom: pd.Series) -> pd.Series:
+    """Kolom jumlah korban -> int. Sel kosong (sering muncul di rilis Candidate) dihitung 0,
+    bukan membuat astype(int) gagal untuk seluruh file."""
+    return pd.to_numeric(kolom, errors="coerce").fillna(0).astype(int)
+
+
 def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
     """Terjemahkan kode/nama UCDP ke kolom berbahasa Indonesia yang dipakai aplikasi."""
     out = pd.DataFrame(
@@ -85,10 +91,10 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
             "pihak_b": df["side_b"],
             "lat": df["latitude"].astype(float),
             "lon": df["longitude"].astype(float),
-            "korban": df["best"].astype(int),
-            "korban_min": df["low"].astype(int),
-            "korban_max": df["high"].astype(int),
-            "korban_sipil": df["deaths_civilians"].astype(int),
+            "korban": _bilangan(df["best"]),
+            "korban_min": _bilangan(df["low"]),
+            "korban_max": _bilangan(df["high"]),
+            "korban_sipil": _bilangan(df["deaths_civilians"]),
             "status": df["status"],
         }
     )
