@@ -89,6 +89,11 @@ def top_negara(df: pd.DataFrame, n: int = 10, metrik: str = "korban") -> pd.Data
 def perubahan_tahunan(df: pd.DataFrame) -> pd.DataFrame:
     """Korban per tahun beserta selisih dan persentase perubahan dari tahun sebelumnya."""
     t = per_tahun(df)[["tahun", "korban", "kejadian"]].copy()
+    if not t.empty:
+        # Tahun tanpa satu baris pun (misalnya setelah filter jenis) berarti 0 korban, bukan
+        # tahun yang dilompati; tanpa ini selisih 2019 -> 2021 tampil sebagai perubahan setahun.
+        semua = range(int(t["tahun"].min()), int(t["tahun"].max()) + 1)
+        t = t.set_index("tahun").reindex(semua, fill_value=0).rename_axis("tahun").reset_index()
     t["selisih"] = t["korban"].diff()
     sebelumnya = t["korban"].shift(1)
     t["perubahan_pct"] = (t["selisih"] / sebelumnya.where(sebelumnya > 0)) * 100

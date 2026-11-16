@@ -243,6 +243,16 @@ def test_konflik_teratas_gabung_tahun_dan_batasi_n():
     assert x["korban"] == 40 and x["tahun_awal"] == 2019 and x["tahun_akhir"] == 2021
 
 
+def test_perubahan_tahunan_mengisi_tahun_tanpa_kejadian(df_kecil):
+    df = df_kecil.copy()
+    df.loc[df["tahun"] == 2021, "tahun"] = 2023
+    p = analisis.perubahan_tahunan(df).set_index("tahun")
+    assert list(p.index) == [2020, 2021, 2022, 2023]
+    assert p.loc[2021, "korban"] == 0 and p.loc[2021, "selisih"] == -130
+    assert p.loc[2022, "korban"] == 0 and pd.isna(p.loc[2022, "perubahan_pct"])
+    assert p.loc[2023, "selisih"] == 1590
+
+
 def test_perubahan_tahunan_tahun_pertama_kosong(df_kecil):
     p = analisis.perubahan_tahunan(df_kecil)
     assert pd.isna(p["selisih"].iloc[0]) and pd.isna(p["perubahan_pct"].iloc[0])
