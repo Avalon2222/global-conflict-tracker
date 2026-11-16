@@ -104,6 +104,8 @@ def pangsa_sipil(df: pd.DataFrame) -> pd.DataFrame:
 
 def kategori_intensitas(korban: int) -> str:
     """Label intensitas mengikuti ambang UCDP: <25 tidak tercatat, 25-999 konflik minor, >=1000 perang."""
+    if pd.isna(korban):
+        return "Tidak diketahui"
     if korban >= AMBANG_PERANG:
         return "Perang"
     if korban >= AMBANG_KONFLIK:
