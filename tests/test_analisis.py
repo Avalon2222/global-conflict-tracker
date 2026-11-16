@@ -273,3 +273,18 @@ def test_pemetaan_negara_abaikan_spasi_tepi():
     assert iso3(" Ukraine ") == "UKR"
     assert nama_indonesia("Ukraine ") == "Ukraina"
     assert iso3("Negara Fiksi") == ""
+
+
+def test_kategori_intensitas_korban_kosong():
+    assert analisis.kategori_intensitas(float("nan")) == "Tidak diketahui"
+
+
+def test_top_negara_dan_peta_tidak_membuang_iso3_kosong():
+    df = pd.DataFrame({
+        "negara": ["A", "B"], "iso3": ["AAA", None], "wilayah": ["Asia", "Afrika"],
+        "korban": [10, 50], "kejadian": [1, 2],
+    })
+    top = analisis.top_negara(df)
+    assert top["negara"].tolist() == ["B", "A"]
+    assert top["korban"].sum() == 60
+    assert set(analisis.peta_negara(df)["negara"]) == {"A", "B"}
