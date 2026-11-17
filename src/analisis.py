@@ -103,6 +103,8 @@ def perubahan_tahunan(df: pd.DataFrame) -> pd.DataFrame:
 def pangsa_sipil(df: pd.DataFrame) -> pd.DataFrame:
     """Persentase korban sipil dari seluruh korban, per tahun."""
     t = per_tahun(df)
+    if "korban_sipil" not in t.columns:  # kolom sipil opsional, sama seperti di per_tahun dan peta_negara
+        t["korban_sipil"] = float("nan")
     t["pangsa_sipil_pct"] = (t["korban_sipil"] / t["korban"].where(t["korban"] > 0)) * 100
     return t[["tahun", "korban", "korban_sipil", "pangsa_sipil_pct"]]
 
