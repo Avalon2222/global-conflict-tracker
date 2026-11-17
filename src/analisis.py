@@ -152,7 +152,8 @@ def profil_negara(negara_tahun: pd.DataFrame, konflik_tahun: pd.DataFrame, negar
         "korban": int(d["korban"].sum()),
         "kejadian": int(d["kejadian"].sum()),
         "korban_sipil": int(d["korban_sipil"].sum()) if "korban_sipil" in d.columns else 0,
-        "tahun_puncak": int(puncak["tahun"].iloc[0]) if not puncak.empty else None,
+        # Seperti ringkasan(): kalau semua tahun nol korban, tidak ada tahun yang pantas disebut puncak.
+        "tahun_puncak": int(puncak["tahun"].iloc[0]) if not puncak.empty and puncak["korban"].iloc[0] > 0 else None,
         "korban_puncak": int(puncak["korban"].iloc[0]) if not puncak.empty else 0,
         "tahun_aktif": int((total["korban"] >= AMBANG_KONFLIK).sum()),
     }
