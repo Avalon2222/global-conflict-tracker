@@ -304,3 +304,9 @@ def test_pangsa_sipil_tanpa_kolom_sipil(df_kecil):
     hasil = analisis.pangsa_sipil(df_kecil.drop(columns=["korban_sipil"]))
     assert hasil["tahun"].tolist() == [2020, 2021]
     assert hasil["pangsa_sipil_pct"].isna().all()
+
+
+def test_profil_negara_tanpa_korban_tidak_punya_tahun_puncak(df_kecil):
+    p = analisis.profil_negara(df_kecil, _konflik_kosong(), "C")   # C: satu kejadian, 0 korban
+    assert p["kejadian"] == 1
+    assert p["tahun_puncak"] is None and p["korban_puncak"] == 0
