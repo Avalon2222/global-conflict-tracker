@@ -298,3 +298,9 @@ def test_top_negara_dan_peta_tidak_membuang_iso3_kosong():
     assert top["negara"].tolist() == ["B", "A"]
     assert top["korban"].sum() == 60
     assert set(analisis.peta_negara(df)["negara"]) == {"A", "B"}
+
+
+def test_pangsa_sipil_tanpa_kolom_sipil(df_kecil):
+    hasil = analisis.pangsa_sipil(df_kecil.drop(columns=["korban_sipil"]))
+    assert hasil["tahun"].tolist() == [2020, 2021]
+    assert hasil["pangsa_sipil_pct"].isna().all()
