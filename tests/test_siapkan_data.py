@@ -233,3 +233,11 @@ def test_agregasi_grid_tolak_resolusi_tidak_positif(mentah, resolusi):
     k = siapkan_data.rapikan_kejadian(mentah)
     with pytest.raises(ValueError, match="resolusi"):
         siapkan_data.agregasi_grid(k, resolusi)
+
+
+def test_wilayah_kosong_tidak_menghilangkan_korban(mentah):
+    mentah.loc[2, "region"] = None
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert k.loc[2, "wilayah"] == "Tidak diketahui"
+    g = siapkan_data.agregasi_negara_tahun(k)
+    assert g["korban"].sum() == mentah["best"].sum()
