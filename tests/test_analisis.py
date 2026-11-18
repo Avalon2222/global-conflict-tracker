@@ -310,3 +310,9 @@ def test_profil_negara_tanpa_korban_tidak_punya_tahun_puncak(df_kecil):
     p = analisis.profil_negara(df_kecil, _konflik_kosong(), "C")   # C: satu kejadian, 0 korban
     assert p["kejadian"] == 1
     assert p["tahun_puncak"] is None and p["korban_puncak"] == 0
+
+
+def test_pemetaan_nama_ucdp_vietnam_dan_turkiye():
+    assert iso3("Vietnam (North Vietnam)") == "VNM"
+    assert nama_indonesia("Vietnam (North Vietnam)") == "Vietnam"
+    assert iso3("Türkiye") == "TUR" and nama_indonesia("Türkiye") == "Turki"

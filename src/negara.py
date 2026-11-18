@@ -137,6 +137,8 @@ PETA_NEGARA: dict[str, tuple[str, str]] = {
     "United States of America": ("USA", "Amerika Serikat"),
     "Uzbekistan": ("UZB", "Uzbekistan"),
     "Venezuela": ("VEN", "Venezuela"),
+    # Nama historis yang dipakai UCDP untuk Vietnam.
+    "Vietnam (North Vietnam)": ("VNM", "Vietnam"),
     "Yemen (North Yemen)": ("YEM", "Yaman"),
     "Zambia": ("ZMB", "Zambia"),
     "Zimbabwe (Rhodesia)": ("ZWE", "Zimbabwe"),
@@ -158,9 +160,16 @@ JENIS_KEKERASAN = {
 }
 
 
+# Ejaan lain untuk negara yang sama (rilis UCDP yang lebih baru menulis Türkiye).
+ALIAS_NEGARA = {"Türkiye": "Turkey"}
+
+
 def _rapikan(nama_ucdp):
     """Buang spasi tepi supaya "Ukraine " tetap dikenali; nilai bukan teks dikembalikan apa adanya."""
-    return nama_ucdp.strip() if isinstance(nama_ucdp, str) else nama_ucdp
+    if not isinstance(nama_ucdp, str):
+        return nama_ucdp
+    nama = nama_ucdp.strip()
+    return ALIAS_NEGARA.get(nama, nama)
 
 
 def iso3(nama_ucdp: str) -> str:
