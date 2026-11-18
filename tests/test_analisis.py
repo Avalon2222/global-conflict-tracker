@@ -316,3 +316,7 @@ def test_pemetaan_nama_ucdp_vietnam_dan_turkiye():
     assert iso3("Vietnam (North Vietnam)") == "VNM"
     assert nama_indonesia("Vietnam (North Vietnam)") == "Vietnam"
     assert iso3("Türkiye") == "TUR" and nama_indonesia("Türkiye") == "Turki"
+
+
+def test_nama_tidak_dikenal_tetap_dirapikan():
+    assert nama_indonesia(" Negara Fiksi ") == "Negara Fiksi"

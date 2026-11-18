@@ -179,4 +179,6 @@ def iso3(nama_ucdp: str) -> str:
 
 def nama_indonesia(nama_ucdp: str) -> str:
     """Nama Indonesia; jika tidak dikenal, kembalikan nama aslinya."""
-    return PETA_NEGARA.get(_rapikan(nama_ucdp), ("", nama_ucdp))[1] or nama_ucdp
+    bersih = _rapikan(nama_ucdp)
+    # Nama yang tidak dikenal tetap dirapikan, supaya "Narnia " dan "Narnia" tidak jadi dua negara.
+    return PETA_NEGARA.get(bersih, ("", bersih))[1] or bersih
