@@ -248,3 +248,12 @@ def test_konflik_tanpa_nama_tetap_masuk_agregasi(mentah):
     g = siapkan_data.agregasi_konflik(siapkan_data.rapikan_kejadian(mentah))
     assert g["korban"].sum() == mentah["best"].sum()
     assert "(tanpa nama)" in set(g["konflik"])
+
+
+def test_kejadian_tanpa_tahun_dilewati(mentah, capsys):
+    mentah["year"] = mentah["year"].astype(float)
+    mentah.loc[1, "year"] = None
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert len(k) == 3
+    assert k["tahun"].dtype.kind == "i"
+    assert "tanpa tahun" in capsys.readouterr().err

@@ -78,9 +78,16 @@ def _bilangan(kolom: pd.Series) -> pd.Series:
 
 def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
     """Terjemahkan kode/nama UCDP ke kolom berbahasa Indonesia yang dipakai aplikasi."""
+    # Baris tanpa tahun tidak bisa diletakkan di linimasa; buang dengan peringatan, jangan
+    # sampai astype(int) menggagalkan seluruh file.
+    tahun = pd.to_numeric(df["year"], errors="coerce")
+    if tahun.isna().any():
+        print(f"  PERINGATAN: {int(tahun.isna().sum())} kejadian tanpa tahun dilewati", file=sys.stderr)
+        df = df[tahun.notna()]
+        tahun = tahun[tahun.notna()]
     out = pd.DataFrame(
         {
-            "tahun": df["year"].astype(int),
+            "tahun": tahun.astype(int),
             "negara_ucdp": df["country"],
             "negara": df["country"].map(nama_indonesia),
             "iso3": df["country"].map(iso3),
