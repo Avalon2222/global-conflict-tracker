@@ -87,7 +87,8 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
             # Wilayah kosong diberi label: groupby di agregasi membuang baris NaN beserta korbannya.
             "wilayah": df["region"].map(WILAYAH_ID).fillna(df["region"]).fillna("Tidak diketahui"),
             "jenis": df["type_of_violence"].map(JENIS_KEKERASAN),
-            "konflik": df["conflict_name"],
+            # Konflik tanpa nama tetap dihitung di tabel konflik, tidak dibuang groupby.
+            "konflik": df["conflict_name"].fillna("(tanpa nama)"),
             "pihak_a": df["side_a"],
             "pihak_b": df["side_b"],
             "lat": df["latitude"].astype(float),

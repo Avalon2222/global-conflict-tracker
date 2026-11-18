@@ -241,3 +241,10 @@ def test_wilayah_kosong_tidak_menghilangkan_korban(mentah):
     assert k.loc[2, "wilayah"] == "Tidak diketahui"
     g = siapkan_data.agregasi_negara_tahun(k)
     assert g["korban"].sum() == mentah["best"].sum()
+
+
+def test_konflik_tanpa_nama_tetap_masuk_agregasi(mentah):
+    mentah.loc[3, "conflict_name"] = None
+    g = siapkan_data.agregasi_konflik(siapkan_data.rapikan_kejadian(mentah))
+    assert g["korban"].sum() == mentah["best"].sum()
+    assert "(tanpa nama)" in set(g["konflik"])
