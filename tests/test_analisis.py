@@ -320,3 +320,13 @@ def test_pemetaan_nama_ucdp_vietnam_dan_turkiye():
 
 def test_nama_tidak_dikenal_tetap_dirapikan():
     assert nama_indonesia(" Negara Fiksi ") == "Negara Fiksi"
+
+
+def test_top_negara_seri_berbagi_peringkat():
+    df = pd.DataFrame({
+        "negara": ["C", "B", "A", "D"], "iso3": ["CCC", "BBB", "AAA", "DDD"], "wilayah": ["Asia"] * 4,
+        "korban": [50, 30, 30, 10], "kejadian": [1, 1, 1, 1],
+    })
+    top = analisis.top_negara(df)
+    assert top["negara"].tolist() == ["C", "A", "B", "D"]
+    assert top["peringkat"].tolist() == [1, 2, 2, 4]
