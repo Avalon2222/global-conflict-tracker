@@ -78,12 +78,12 @@ def top_negara(df: pd.DataFrame, n: int = 10, metrik: str = "korban") -> pd.Data
     g = (
         df.groupby(["negara", "iso3", "wilayah"], as_index=False, dropna=False)
         .agg(korban=("korban", "sum"), kejadian=("kejadian", "sum"))
-        .sort_values(metrik, ascending=False)
-        .head(n)
+        .sort_values([metrik, "negara"], ascending=[False, True], kind="mergesort")
         .reset_index(drop=True)
     )
-    g["peringkat"] = range(1, len(g) + 1)
-    return g
+    # Jumlah sama = peringkat sama (1, 2, 2, 4); seri diurutkan menurut nama supaya stabil.
+    g["peringkat"] = g[metrik].rank(method="min", ascending=False).astype(int)
+    return g.head(n)
 
 
 def perubahan_tahunan(df: pd.DataFrame) -> pd.DataFrame:
