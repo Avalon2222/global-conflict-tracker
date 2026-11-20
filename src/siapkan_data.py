@@ -99,8 +99,9 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
             "konflik": df["conflict_name"].fillna("(tanpa nama)"),
             "pihak_a": df["side_a"],
             "pihak_b": df["side_b"],
-            "lat": df["latitude"].astype(float),
-            "lon": df["longitude"].astype(float),
+            # Koordinat berupa teks rusak (mis. "n/a") jadi NaN, bukan menggagalkan seluruh file.
+            "lat": pd.to_numeric(df["latitude"], errors="coerce"),
+            "lon": pd.to_numeric(df["longitude"], errors="coerce"),
             "korban": _bilangan(df["best"]),
             "korban_min": _bilangan(df["low"]),
             "korban_max": _bilangan(df["high"]),

@@ -266,3 +266,13 @@ def test_unduh_ulang_kalau_file_lokal_kosong(monkeypatch, tmp_path):
     siapkan_data.unduh("https://contoh/kandidat.csv", tujuan)
     assert diminta == ["https://contoh/kandidat.csv"]
     assert tujuan.read_bytes() == b"id,year\n3,2025\n"
+
+
+def test_rapikan_kejadian_koordinat_teks_rusak(mentah):
+    df = mentah.astype({"latitude": object, "longitude": object})
+    df.loc[0, "latitude"] = "n/a"
+    df.loc[1, "longitude"] = ""
+    hasil = siapkan_data.rapikan_kejadian(df)
+    assert len(hasil) == 4
+    assert pd.isna(hasil.loc[0, "lat"]) and pd.isna(hasil.loc[1, "lon"])
+    assert hasil.loc[2, "lat"] == 34.0
