@@ -49,7 +49,8 @@ def unduh(url: str, tujuan: Path) -> Path:
     import requests  # impor di sini agar modul tetap ringan saat diuji
 
     tujuan.parent.mkdir(parents=True, exist_ok=True)
-    if tujuan.exists():
+    # File 0 byte = sisa unduhan yang gagal/terputus; jangan dipakai ulang, unduh lagi.
+    if tujuan.exists() and tujuan.stat().st_size > 0:
         print(f"  pakai file lokal {tujuan}")
         return tujuan
     print(f"  mengunduh {url} ...")

@@ -257,3 +257,12 @@ def test_kejadian_tanpa_tahun_dilewati(mentah, capsys):
     assert len(k) == 3
     assert k["tahun"].dtype.kind == "i"
     assert "tanpa tahun" in capsys.readouterr().err
+
+
+def test_unduh_ulang_kalau_file_lokal_kosong(monkeypatch, tmp_path):
+    diminta = _pasang_unduhan(monkeypatch, b"id,year\n3,2025\n")
+    tujuan = tmp_path / "kandidat.csv"
+    tujuan.write_bytes(b"")
+    siapkan_data.unduh("https://contoh/kandidat.csv", tujuan)
+    assert diminta == ["https://contoh/kandidat.csv"]
+    assert tujuan.read_bytes() == b"id,year\n3,2025\n"
