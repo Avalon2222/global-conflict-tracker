@@ -291,3 +291,11 @@ def test_rapikan_kejadian_wilayah_berspasi_tetap_diterjemahkan(mentah):
     mentah.loc[0, "region"] = " Europe "
     k = siapkan_data.rapikan_kejadian(mentah)
     assert k.loc[0, "wilayah"] == k.loc[1, "wilayah"]
+
+
+def test_rapikan_kejadian_nama_konflik_spasi(mentah):
+    mentah.loc[2, "conflict_name"] = "   "
+    mentah.loc[0, "conflict_name"] = "Ukraina: Rusia "
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert k.loc[2, "konflik"] == "(tanpa nama)"
+    assert k.loc[0, "konflik"] == k.loc[1, "konflik"]
