@@ -90,7 +90,8 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
         {
             "tahun": tahun.astype(int),
             "negara_ucdp": df["country"],
-            "negara": df["country"].map(nama_indonesia),
+            # Negara kosong diberi label; kalau NaN, groupby di agregasi membuang korbannya diam-diam.
+            "negara": df["country"].map(nama_indonesia).fillna("Tidak diketahui"),
             "iso3": df["country"].map(iso3),
             # Wilayah kosong diberi label: groupby di agregasi membuang baris NaN beserta korbannya.
             "wilayah": df["region"].map(WILAYAH_ID).fillna(df["region"]).fillna("Tidak diketahui"),
