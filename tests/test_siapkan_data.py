@@ -276,3 +276,11 @@ def test_rapikan_kejadian_koordinat_teks_rusak(mentah):
     assert len(hasil) == 4
     assert pd.isna(hasil.loc[0, "lat"]) and pd.isna(hasil.loc[1, "lon"])
     assert hasil.loc[2, "lat"] == 34.0
+
+
+def test_rapikan_kejadian_negara_kosong_tidak_hilang(mentah):
+    mentah.loc[3, "country"] = None
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert k.loc[3, "negara"] == "Tidak diketahui"
+    g = siapkan_data.agregasi_negara_tahun(k)
+    assert g["korban"].sum() == mentah["best"].sum()
