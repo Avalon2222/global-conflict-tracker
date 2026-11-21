@@ -284,3 +284,10 @@ def test_rapikan_kejadian_negara_kosong_tidak_hilang(mentah):
     assert k.loc[3, "negara"] == "Tidak diketahui"
     g = siapkan_data.agregasi_negara_tahun(k)
     assert g["korban"].sum() == mentah["best"].sum()
+
+
+def test_rapikan_kejadian_wilayah_berspasi_tetap_diterjemahkan(mentah):
+    mentah["region"] = mentah["region"].astype(object)
+    mentah.loc[0, "region"] = " Europe "
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert k.loc[0, "wilayah"] == k.loc[1, "wilayah"]

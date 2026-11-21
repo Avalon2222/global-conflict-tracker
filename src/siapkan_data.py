@@ -86,6 +86,8 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
         print(f"  PERINGATAN: {int(tahun.isna().sum())} kejadian tanpa tahun dilewati", file=sys.stderr)
         df = df[tahun.notna()]
         tahun = tahun[tahun.notna()]
+    # " Europe" dari ekspor yang tidak rapi tetap diterjemahkan, tidak jadi wilayah tersendiri.
+    wilayah = df["region"].str.strip()
     out = pd.DataFrame(
         {
             "tahun": tahun.astype(int),
@@ -94,7 +96,7 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
             "negara": df["country"].map(nama_indonesia).fillna("Tidak diketahui"),
             "iso3": df["country"].map(iso3),
             # Wilayah kosong diberi label: groupby di agregasi membuang baris NaN beserta korbannya.
-            "wilayah": df["region"].map(WILAYAH_ID).fillna(df["region"]).fillna("Tidak diketahui"),
+            "wilayah": wilayah.map(WILAYAH_ID).fillna(wilayah).fillna("Tidak diketahui"),
             "jenis": df["type_of_violence"].map(JENIS_KEKERASAN),
             # Konflik tanpa nama tetap dihitung di tabel konflik, tidak dibuang groupby.
             "konflik": df["conflict_name"].fillna("(tanpa nama)"),
