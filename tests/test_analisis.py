@@ -330,3 +330,7 @@ def test_top_negara_seri_berbagi_peringkat():
     top = analisis.top_negara(df)
     assert top["negara"].tolist() == ["C", "A", "B", "D"]
     assert top["peringkat"].tolist() == [1, 2, 2, 4]
+
+
+def test_top_negara_n_negatif_kosong(df_kecil):
+    assert analisis.top_negara(df_kecil, n=-1).empty
