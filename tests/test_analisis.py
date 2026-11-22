@@ -334,3 +334,12 @@ def test_top_negara_seri_berbagi_peringkat():
 
 def test_top_negara_n_negatif_kosong(df_kecil):
     assert analisis.top_negara(df_kecil, n=-1).empty
+
+
+def test_konflik_teratas_dan_profil_n_negatif(df_kecil):
+    k = pd.DataFrame({
+        "konflik": ["X", "Y"], "jenis": ["Konflik negara"] * 2, "tahun": [2020, 2020],
+        "korban": [10, 5], "kejadian": [1, 1], "negara_utama": ["A", "A"],
+    })
+    assert analisis.konflik_teratas(k, n=-1).empty
+    assert analisis.profil_negara(df_kecil, k, "A", n_konflik=-1)["konflik"].empty
