@@ -141,7 +141,8 @@ def profil_negara(negara_tahun: pd.DataFrame, konflik_tahun: pd.DataFrame, negar
         konflik_tahun[konflik_tahun["negara_utama"] == negara]
         .groupby(["konflik", "jenis"], as_index=False)
         .agg(korban=("korban", "sum"), kejadian=("kejadian", "sum"), tahun_awal=("tahun", "min"), tahun_akhir=("tahun", "max"))
-        .sort_values("korban", ascending=False)
+        # Korban sama diurutkan menurut nama (mergesort stabil), bukan acak dari quicksort.
+        .sort_values(["korban", "konflik"], ascending=[False, True], kind="mergesort")
         .head(max(n_konflik, 0))
         .reset_index(drop=True)
     )
@@ -165,7 +166,8 @@ def konflik_teratas(konflik_tahun: pd.DataFrame, n: int = 10) -> pd.DataFrame:
     return (
         konflik_tahun.groupby(["konflik", "jenis"], as_index=False)
         .agg(korban=("korban", "sum"), kejadian=("kejadian", "sum"), tahun_awal=("tahun", "min"), tahun_akhir=("tahun", "max"))
-        .sort_values("korban", ascending=False)
+        # Korban sama diurutkan menurut nama (mergesort stabil), bukan acak dari quicksort.
+        .sort_values(["korban", "konflik"], ascending=[False, True], kind="mergesort")
         .head(max(n, 0))
         .reset_index(drop=True)
     )

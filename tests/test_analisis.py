@@ -343,3 +343,14 @@ def test_konflik_teratas_dan_profil_n_negatif(df_kecil):
     })
     assert analisis.konflik_teratas(k, n=-1).empty
     assert analisis.profil_negara(df_kecil, k, "A", n_konflik=-1)["konflik"].empty
+
+
+def test_konflik_teratas_seri_urut_nama():
+    nama = [f"K{i:03d}" for i in range(60)]
+    k = pd.DataFrame({
+        "konflik": nama, "jenis": ["Konflik negara"] * 60, "tahun": [2020] * 60,
+        "korban": [i % 3 for i in range(60)], "kejadian": [1] * 60,
+    })
+    hasil = analisis.konflik_teratas(k, n=60)
+    harap = sorted(nama, key=lambda x: (-(int(x[1:]) % 3), x))
+    assert hasil["konflik"].tolist() == harap
