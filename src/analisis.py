@@ -83,7 +83,8 @@ def top_negara(df: pd.DataFrame, n: int = 10, metrik: str = "korban") -> pd.Data
     )
     # Jumlah sama = peringkat sama (1, 2, 2, 4); seri diurutkan menurut nama supaya stabil.
     g["peringkat"] = g[metrik].rank(method="min", ascending=False).astype(int)
-    return g.head(n)
+    # head(-n) membuang n negara terakhir; batas negatif berarti nol baris.
+    return g.head(max(n, 0))
 
 
 def perubahan_tahunan(df: pd.DataFrame) -> pd.DataFrame:
