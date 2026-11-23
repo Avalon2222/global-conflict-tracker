@@ -370,3 +370,11 @@ def test_ringkasan_seri_pilih_negara_abjad_dan_tahun_terawal():
     r = analisis.ringkasan(pd.DataFrame(baris))
     assert r["negara_tertinggi"] == "N04"
     assert r["tahun_terburuk"] == 2004
+
+
+def test_profil_negara_tahun_puncak_seri_ambil_terawal():
+    negara_tahun = pd.DataFrame([{"negara": "A", "iso3": "AAA", "wilayah": "Asia", "tahun": 2000 + i,
+                                  "jenis": "Konflik negara", "korban": 100 * (i % 5 + 1), "kejadian": 1}
+                                 for i in range(20)])
+    konflik = pd.DataFrame(columns=["konflik", "jenis", "tahun", "korban", "kejadian", "negara_utama"])
+    assert analisis.profil_negara(negara_tahun, konflik, "A")["tahun_puncak"] == 2004
