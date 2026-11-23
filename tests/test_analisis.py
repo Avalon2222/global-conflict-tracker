@@ -354,3 +354,11 @@ def test_konflik_teratas_seri_urut_nama():
     hasil = analisis.konflik_teratas(k, n=60)
     harap = sorted(nama, key=lambda x: (-(int(x[1:]) % 3), x))
     assert hasil["konflik"].tolist() == harap
+
+
+def test_peta_negara_jumlah_seri_urut_nama():
+    baris = [{"negara": f"N{i:02d}", "iso3": f"X{i:02d}", "wilayah": "Asia", "tahun": 2000 + i,
+              "korban": 100 * (i % 3 + 1), "kejadian": 1} for i in range(60)]
+    peta = analisis.peta_negara(pd.DataFrame(baris))
+    teratas = peta[peta["korban"] == 300]["negara"].tolist()
+    assert teratas == sorted(teratas)

@@ -129,7 +129,8 @@ def peta_negara(df: pd.DataFrame, metrik: str = "korban") -> pd.DataFrame:
     g = df.groupby(["negara", "iso3", "wilayah"], as_index=False, dropna=False).agg(**agg)
     g["intensitas"] = g["korban"].apply(kategori_intensitas)
     g = g[g[metrik] > 0]
-    return g.sort_values(metrik, ascending=False).reset_index(drop=True)
+    # Seri diurutkan menurut nama negara, sama seperti top_negara, supaya tabel peta tidak acak.
+    return g.sort_values([metrik, "negara"], ascending=[False, True], kind="mergesort").reset_index(drop=True)
 
 
 def profil_negara(negara_tahun: pd.DataFrame, konflik_tahun: pd.DataFrame, negara: str, n_konflik: int = 8) -> dict:
