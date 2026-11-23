@@ -362,3 +362,11 @@ def test_peta_negara_jumlah_seri_urut_nama():
     peta = analisis.peta_negara(pd.DataFrame(baris))
     teratas = peta[peta["korban"] == 300]["negara"].tolist()
     assert teratas == sorted(teratas)
+
+
+def test_ringkasan_seri_pilih_negara_abjad_dan_tahun_terawal():
+    baris = [{"negara": f"N{i:02d}", "iso3": "X", "wilayah": "Asia", "tahun": 2000 + i,
+              "korban": 100 * (i % 5 + 1), "kejadian": 1} for i in range(20)]
+    r = analisis.ringkasan(pd.DataFrame(baris))
+    assert r["negara_tertinggi"] == "N04"
+    assert r["tahun_terburuk"] == 2004

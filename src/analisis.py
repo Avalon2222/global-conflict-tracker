@@ -43,8 +43,10 @@ def ringkasan(df: pd.DataFrame) -> dict:
     """Angka-angka untuk kartu KPI."""
     if df.empty:
         return {"korban": 0, "kejadian": 0, "negara": 0, "negara_tertinggi": "-", "korban_tertinggi": 0, "tahun_terburuk": None, "korban_tahun_terburuk": 0}
-    per_negara = df.groupby("negara")["korban"].sum().sort_values(ascending=False)
-    per_tahun = df.groupby("tahun")["korban"].sum().sort_values(ascending=False)
+    # mergesort: kalau jumlah korban seri, negara pertama menurut abjad dan tahun paling awal yang
+    # dipilih (urutan groupby). Quicksort bawaan memilih salah satunya secara acak.
+    per_negara = df.groupby("negara")["korban"].sum().sort_values(ascending=False, kind="mergesort")
+    per_tahun = df.groupby("tahun")["korban"].sum().sort_values(ascending=False, kind="mergesort")
     # Kalau semua baris korbannya nol, tidak ada negara atau tahun yang pantas disebut "tertinggi".
     ada_korban = per_negara.iloc[0] > 0
     return {
