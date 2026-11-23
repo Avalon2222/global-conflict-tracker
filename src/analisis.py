@@ -149,7 +149,8 @@ def profil_negara(negara_tahun: pd.DataFrame, konflik_tahun: pd.DataFrame, negar
         .head(max(n_konflik, 0))
         .reset_index(drop=True)
     )
-    puncak = total.sort_values("korban", ascending=False).head(1)
+    # Tahun dengan korban seri: ambil yang paling awal, bukan pilihan acak quicksort.
+    puncak = total.sort_values("korban", ascending=False, kind="mergesort").head(1)
     return {
         "tren": tren,
         "total": total,
