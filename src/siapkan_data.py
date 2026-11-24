@@ -87,7 +87,8 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
         df = df[tahun.notna()]
         tahun = tahun[tahun.notna()]
     # " Europe" dari ekspor yang tidak rapi tetap diterjemahkan, tidak jadi wilayah tersendiri.
-    wilayah = df["region"].str.strip()
+    # astype("string"): kolom yang seluruhnya kosong dibaca pandas sebagai float, dan .str gagal.
+    wilayah = df["region"].astype("string").str.strip()
     out = pd.DataFrame(
         {
             "tahun": tahun.astype(int),
@@ -100,7 +101,7 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
             "jenis": df["type_of_violence"].map(JENIS_KEKERASAN),
             # Konflik tanpa nama tetap dihitung di tabel konflik, tidak dibuang groupby.
             # Nama yang hanya berisi spasi juga dihitung tanpa nama, bukan jadi konflik "kosong".
-            "konflik": df["conflict_name"].str.strip().replace("", None).fillna("(tanpa nama)"),
+            "konflik": df["conflict_name"].astype("string").str.strip().replace("", None).fillna("(tanpa nama)"),
             "pihak_a": df["side_a"],
             "pihak_b": df["side_b"],
             # Koordinat berupa teks rusak (mis. "n/a") jadi NaN, bukan menggagalkan seluruh file.
