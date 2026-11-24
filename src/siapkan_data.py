@@ -75,7 +75,9 @@ def baca_kejadian(path: Path, status: str) -> pd.DataFrame:
 def _bilangan(kolom: pd.Series) -> pd.Series:
     """Kolom jumlah korban -> int. Sel kosong (sering muncul di rilis Candidate) dihitung 0,
     bukan membuat astype(int) gagal untuk seluruh file."""
-    return pd.to_numeric(kolom, errors="coerce").fillna(0).astype(int)
+    angka = pd.to_numeric(kolom, errors="coerce")
+    # "inf" lolos fillna lalu membuat astype(int) gagal; perlakukan seperti sel rusak.
+    return angka.where(np.isfinite(angka), 0).astype(int)
 
 
 def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
@@ -83,6 +85,7 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
     # Baris tanpa tahun tidak bisa diletakkan di linimasa; buang dengan peringatan, jangan
     # sampai astype(int) menggagalkan seluruh file.
     tahun = pd.to_numeric(df["year"], errors="coerce")
+    tahun = tahun.where(np.isfinite(tahun))  # tahun "inf" sama rusaknya dengan sel kosong
     if tahun.isna().any():
         print(f"  PERINGATAN: {int(tahun.isna().sum())} kejadian tanpa tahun dilewati", file=sys.stderr)
         df = df[tahun.notna()]
