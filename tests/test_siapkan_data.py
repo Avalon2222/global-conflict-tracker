@@ -299,3 +299,13 @@ def test_rapikan_kejadian_nama_konflik_spasi(mentah):
     k = siapkan_data.rapikan_kejadian(mentah)
     assert k.loc[2, "konflik"] == "(tanpa nama)"
     assert k.loc[0, "konflik"] == k.loc[1, "konflik"]
+
+
+def test_rapikan_kejadian_kolom_teks_kosong_semua(mentah):
+    # Kolom yang seluruhnya kosong dibaca read_csv sebagai float, bukan teks.
+    mentah["region"] = float("nan")
+    mentah["conflict_name"] = float("nan")
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert set(k["wilayah"]) == {"Tidak diketahui"}
+    assert set(k["konflik"]) == {"(tanpa nama)"}
+    assert siapkan_data.agregasi_negara_tahun(k)["korban"].sum() == mentah["best"].sum()
