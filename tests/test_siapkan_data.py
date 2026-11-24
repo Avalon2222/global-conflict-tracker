@@ -90,6 +90,16 @@ def test_rapikan_kejadian_angka_korban_kosong(mentah):
     assert k["korban"].tolist() == [10, 5, 3, 7]
 
 
+def test_rapikan_kejadian_angka_tak_hingga(mentah, capsys):
+    m = mentah.astype({"year": object, "best": object})
+    m.loc[0, "year"] = "inf"
+    m.loc[1, "best"] = "inf"
+    k = siapkan_data.rapikan_kejadian(m)
+    assert len(k) == len(mentah) - 1              # baris bertahun inf dilewati, bukan error astype
+    assert k["korban"].tolist() == [0, 3, 7]
+    assert "1 kejadian tanpa tahun" in capsys.readouterr().err
+
+
 def test_agregasi_konflik_negara_utama_saat_seri(mentah):
     # Konflik lintas perbatasan: satu kejadian di Ukraina (10 korban), satu di Rusia (2 korban).
     m = mentah.iloc[[0, 1]].copy()
