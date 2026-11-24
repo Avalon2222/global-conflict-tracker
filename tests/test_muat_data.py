@@ -48,3 +48,15 @@ def test_grid_dan_konflik_di_repo_masuk_akal():
     # Rentang tahun ketiga tabel sama, supaya filter tahun di dashboard berlaku seragam.
     negara = muat_data.muat_negara_tahun()
     assert grid["tahun"].max() == negara["tahun"].max() == konflik["tahun"].max()
+
+
+def test_kolom_angka_berisi_teks_ditolak(tmp_path, monkeypatch):
+    (tmp_path / "konflik_tahun.csv").write_text(
+        "konflik,jenis,tahun,status,kejadian,korban,negara_utama\n"
+        "A,Konflik negara,2024,final,1,10,Ukraina\n"
+        "B,Konflik negara,2024,final,1,tidak ada,Ukraina\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(muat_data, "FOLDER_DATA", tmp_path)
+    with pytest.raises(ValueError, match=r"kolom korban harus angka, cek baris \[3\]"):
+        muat_data.muat_konflik()

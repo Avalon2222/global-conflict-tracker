@@ -11,6 +11,8 @@ import pandas as pd
 
 FOLDER_DATA = Path(__file__).resolve().parent.parent / "data"
 
+KOLOM_ANGKA = ["tahun", "kejadian", "korban", "korban_min", "korban_max", "korban_sipil", "lat", "lon"]
+
 URUTAN_JENIS = ["Konflik negara", "Konflik non-negara", "Kekerasan sepihak"]
 
 
@@ -54,3 +56,10 @@ def _validasi(df: pd.DataFrame, kolom_wajib: list[str], nama: str) -> None:
         raise ValueError(f"{nama}: kolom hilang -> {hilang}")
     if df.empty:
         raise ValueError(f"{nama}: file kosong")
+    # Satu sel rusak membuat kolom angka terbaca sebagai teks; _baca lalu mengisinya "" dan
+    # sum() menyambung teks, bukan menjumlah. Lebih baik gagal dengan pesan yang jelas.
+    for kolom in KOLOM_ANGKA:
+        if kolom in df.columns and not pd.api.types.is_numeric_dtype(df[kolom]):
+            rusak = pd.to_numeric(df[kolom].replace("", None), errors="coerce").isna() & (df[kolom] != "")
+            baris = (df.index[rusak] + 2).tolist()[:5]  # +2: header dan nomor baris mulai dari 1
+            raise ValueError(f"{nama}: kolom {kolom} harus angka, cek baris {baris}")
