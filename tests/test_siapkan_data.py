@@ -309,3 +309,13 @@ def test_rapikan_kejadian_kolom_teks_kosong_semua(mentah):
     assert set(k["wilayah"]) == {"Tidak diketahui"}
     assert set(k["konflik"]) == {"(tanpa nama)"}
     assert siapkan_data.agregasi_negara_tahun(k)["korban"].sum() == mentah["best"].sum()
+
+
+def test_agregasi_grid_buang_koordinat_tak_hingga(mentah):
+    k = siapkan_data.rapikan_kejadian(mentah)
+    k.loc[0, "lat"] = float("inf")
+    k.loc[1, "lon"] = float("-inf")
+    g = siapkan_data.agregasi_grid(k)
+    assert g["lat"].abs().max() <= 90
+    assert g["lon"].abs().max() <= 180
+    assert g["kejadian"].sum() == 2
