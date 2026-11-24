@@ -26,6 +26,7 @@ import sys
 import zipfile
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from src.negara import JENIS_KEKERASAN, WILAYAH_ID, iso3, nama_indonesia
@@ -145,6 +146,8 @@ def agregasi_grid(k: pd.DataFrame, resolusi: float = RESOLUSI_GRID) -> pd.DataFr
     """Kejadian dibulatkan ke sel grid agar peta ringan tetapi polanya tetap terlihat."""
     if not resolusi > 0:
         raise ValueError(f"resolusi grid harus lebih dari 0, dapat {resolusi}")
+    # Koordinat tak hingga lolos dari groupby (beda dengan NaN) dan jadi titik di luar peta.
+    k = k[np.isfinite(k["lat"]) & np.isfinite(k["lon"])]
     sel = k.assign(
         lat=(k["lat"] / resolusi).round() * resolusi,
         lon=(k["lon"] / resolusi).round() * resolusi,
