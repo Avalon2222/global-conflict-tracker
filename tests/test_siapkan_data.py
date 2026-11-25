@@ -329,3 +329,12 @@ def test_agregasi_grid_buang_koordinat_tak_hingga(mentah):
     assert g["lat"].abs().max() <= 90
     assert g["lon"].abs().max() <= 180
     assert g["kejadian"].sum() == 2
+
+
+def test_kejadian_tahun_pecahan_dilewati(mentah, capsys):
+    mentah["year"] = mentah["year"].astype(float)
+    mentah.loc[0, "year"] = 2023.5
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert len(k) == 3
+    assert 2023 not in k["tahun"].tolist()
+    assert "tanpa tahun" in capsys.readouterr().err
