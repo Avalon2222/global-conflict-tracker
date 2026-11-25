@@ -63,3 +63,9 @@ def _validasi(df: pd.DataFrame, kolom_wajib: list[str], nama: str) -> None:
             rusak = pd.to_numeric(df[kolom].replace("", None), errors="coerce").isna() & (df[kolom] != "")
             baris = (df.index[rusak] + 2).tolist()[:5]  # +2: header dan nomor baris mulai dari 1
             raise ValueError(f"{nama}: kolom {kolom} harus angka, cek baris {baris}")
+        # "inf" terbaca sebagai angka sehingga lolos cek di atas, lalu int(sum) di kartu KPI gagal (OverflowError).
+        if kolom in df.columns and pd.api.types.is_numeric_dtype(df[kolom]):
+            tak_hingga = df[kolom].isin([float("inf"), float("-inf")])
+            if tak_hingga.any():
+                baris = (df.index[tak_hingga] + 2).tolist()[:5]
+                raise ValueError(f"{nama}: kolom {kolom} berisi nilai tak hingga, cek baris {baris}")

@@ -60,3 +60,9 @@ def test_kolom_angka_berisi_teks_ditolak(tmp_path, monkeypatch):
     monkeypatch.setattr(muat_data, "FOLDER_DATA", tmp_path)
     with pytest.raises(ValueError, match=r"kolom korban harus angka, cek baris \[3\]"):
         muat_data.muat_konflik()
+
+
+def test_kolom_angka_tak_hingga_ditolak():
+    df = pd.DataFrame({"tahun": [2024, 2024], "korban": [5.0, float("inf")]})
+    with pytest.raises(ValueError, match=r"korban berisi nilai tak hingga, cek baris \[3\]"):
+        muat_data._validasi(df, ["tahun", "korban"], "x.csv")
