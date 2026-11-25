@@ -338,3 +338,10 @@ def test_kejadian_tahun_pecahan_dilewati(mentah, capsys):
     assert len(k) == 3
     assert 2023 not in k["tahun"].tolist()
     assert "tanpa tahun" in capsys.readouterr().err
+
+
+def test_kode_kekerasan_berupa_teks_tetap_dikenali(mentah, capsys):
+    mentah["type_of_violence"] = ["1", "1", "3", "x"]
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert k["jenis"].tolist()[:3] == ["Konflik negara", "Konflik negara", "Kekerasan sepihak"]
+    assert k["jenis"].iloc[3] == "Tidak diketahui"

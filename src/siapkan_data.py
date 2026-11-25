@@ -104,7 +104,9 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
             "iso3": df["country"].map(iso3),
             # Wilayah kosong diberi label: groupby di agregasi membuang baris NaN beserta korbannya.
             "wilayah": wilayah.map(WILAYAH_ID).fillna(wilayah).fillna("Tidak diketahui"),
-            "jenis": df["type_of_violence"].map(JENIS_KEKERASAN),
+            # Kode dibaca sebagai angka dulu: satu sel teks membuat seluruh kolom jadi teks ("1"),
+            # dan "1" tidak cocok dengan kunci 1 sehingga semua kejadian jadi "Tidak diketahui".
+            "jenis": pd.to_numeric(df["type_of_violence"], errors="coerce").map(JENIS_KEKERASAN),
             # Konflik tanpa nama tetap dihitung di tabel konflik, tidak dibuang groupby.
             # Nama yang hanya berisi spasi juga dihitung tanpa nama, bukan jadi konflik "kosong".
             "konflik": df["conflict_name"].astype("string").str.strip().replace("", None).fillna("(tanpa nama)"),
