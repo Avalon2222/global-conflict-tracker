@@ -86,6 +86,8 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
     # sampai astype(int) menggagalkan seluruh file.
     tahun = pd.to_numeric(df["year"], errors="coerce")
     tahun = tahun.where(np.isfinite(tahun))  # tahun "inf" sama rusaknya dengan sel kosong
+    # Tahun pecahan (2023.5) juga rusak; astype(int) dulu diam-diam memotongnya jadi 2023.
+    tahun = tahun.where(tahun % 1 == 0)
     if tahun.isna().any():
         print(f"  PERINGATAN: {int(tahun.isna().sum())} kejadian tanpa tahun dilewati", file=sys.stderr)
         df = df[tahun.notna()]
