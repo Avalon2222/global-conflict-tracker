@@ -71,6 +71,12 @@ def _validasi(df: pd.DataFrame, kolom_wajib: list[str], nama: str) -> None:
             if tak_hingga.any():
                 baris = (df.index[tak_hingga] + 2).tolist()[:5]
                 raise ValueError(f"{nama}: kolom {kolom} berisi nilai tak hingga, cek baris {baris}")
+            # Tahun pecahan (2020.5) lolos sebagai angka, lalu int() di kartu KPI memotongnya diam-diam.
+            if kolom == "tahun":
+                pecahan = df[kolom].notna() & (df[kolom] % 1 != 0)
+                if pecahan.any():
+                    baris = (df.index[pecahan] + 2).tolist()[:5]
+                    raise ValueError(f"{nama}: kolom tahun harus bilangan bulat, cek baris {baris}")
             # Jumlah kejadian dan korban tidak mungkin negatif; nilai seperti -5 diam-diam mengurangi total.
             if kolom in KOLOM_HITUNGAN:
                 negatif = df[kolom] < 0
