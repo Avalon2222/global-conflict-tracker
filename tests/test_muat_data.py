@@ -73,3 +73,11 @@ def test_baca_buang_spasi_di_kolom_teks(tmp_path, monkeypatch):
     monkeypatch.setattr(muat_data, "FOLDER_DATA", tmp_path)
     df = muat_data._baca("uji.csv")
     assert df.groupby("negara")["korban"].sum().to_dict() == {"Indonesia": 8}
+
+
+def test_kolom_hitungan_negatif_ditolak():
+    df = pd.DataFrame({"tahun": [2024, 2024], "lat": [-6.2, -6.2], "korban": [5, -3]})
+    with pytest.raises(ValueError, match=r"korban tidak boleh negatif, cek baris \[3\]"):
+        muat_data._validasi(df, ["tahun", "korban"], "x.csv")
+    # Lintang negatif (belahan selatan) tetap wajar.
+    muat_data._validasi(df.assign(korban=[5, 3]), ["tahun", "korban"], "x.csv")
