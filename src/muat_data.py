@@ -11,6 +11,7 @@ import pandas as pd
 
 FOLDER_DATA = Path(__file__).resolve().parent.parent / "data"
 
+KOLOM_HITUNGAN = ["kejadian", "korban", "korban_min", "korban_max", "korban_sipil"]
 KOLOM_ANGKA = ["tahun", "kejadian", "korban", "korban_min", "korban_max", "korban_sipil", "lat", "lon"]
 
 URUTAN_JENIS = ["Konflik negara", "Konflik non-negara", "Kekerasan sepihak"]
@@ -70,3 +71,9 @@ def _validasi(df: pd.DataFrame, kolom_wajib: list[str], nama: str) -> None:
             if tak_hingga.any():
                 baris = (df.index[tak_hingga] + 2).tolist()[:5]
                 raise ValueError(f"{nama}: kolom {kolom} berisi nilai tak hingga, cek baris {baris}")
+            # Jumlah kejadian dan korban tidak mungkin negatif; nilai seperti -5 diam-diam mengurangi total.
+            if kolom in KOLOM_HITUNGAN:
+                negatif = df[kolom] < 0
+                if negatif.any():
+                    baris = (df.index[negatif] + 2).tolist()[:5]
+                    raise ValueError(f"{nama}: kolom {kolom} tidak boleh negatif, cek baris {baris}")
