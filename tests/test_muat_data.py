@@ -66,3 +66,10 @@ def test_kolom_angka_tak_hingga_ditolak():
     df = pd.DataFrame({"tahun": [2024, 2024], "korban": [5.0, float("inf")]})
     with pytest.raises(ValueError, match=r"korban berisi nilai tak hingga, cek baris \[3\]"):
         muat_data._validasi(df, ["tahun", "korban"], "x.csv")
+
+
+def test_baca_buang_spasi_di_kolom_teks(tmp_path, monkeypatch):
+    (tmp_path / "uji.csv").write_text("negara,korban\nIndonesia,5\n Indonesia ,3\n", encoding="utf-8")
+    monkeypatch.setattr(muat_data, "FOLDER_DATA", tmp_path)
+    df = muat_data._baca("uji.csv")
+    assert df.groupby("negara")["korban"].sum().to_dict() == {"Indonesia": 8}

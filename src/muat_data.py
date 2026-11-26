@@ -25,7 +25,8 @@ def _baca(nama_file: str) -> pd.DataFrame:
     df = pd.read_csv(FOLDER_DATA / nama_file)
     for kolom in df.columns:
         if _kolom_teks(df[kolom]):
-            df[kolom] = df[kolom].fillna("")
+            # Spasi sisa suntingan manual (" Indonesia") membuat satu negara terhitung dua di groupby.
+            df[kolom] = df[kolom].fillna("").map(lambda v: v.strip() if isinstance(v, str) else v)
     return df
 
 
