@@ -73,6 +73,12 @@ def _validasi(df: pd.DataFrame, kolom_wajib: list[str], nama: str) -> None:
                 raise ValueError(f"{nama}: kolom {kolom} berisi nilai tak hingga, cek baris {baris}")
             # Tahun pecahan (2020.5) lolos sebagai angka, lalu int() di kartu KPI memotongnya diam-diam.
             if kolom == "tahun":
+                # Tahun kosong tidak bisa ditempatkan di grafik mana pun, dan membuat kolom tahun jadi float
+                # sehingga sumbu dan kartu KPI menampilkan "2020.0".
+                kosong = df[kolom].isna()
+                if kosong.any():
+                    baris = (df.index[kosong] + 2).tolist()[:5]
+                    raise ValueError(f"{nama}: kolom tahun kosong, cek baris {baris}")
                 pecahan = df[kolom].notna() & (df[kolom] % 1 != 0)
                 if pecahan.any():
                     baris = (df.index[pecahan] + 2).tolist()[:5]
