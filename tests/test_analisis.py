@@ -378,3 +378,9 @@ def test_profil_negara_tahun_puncak_seri_ambil_terawal():
                                  for i in range(20)])
     konflik = pd.DataFrame(columns=["konflik", "jenis", "tahun", "korban", "kejadian", "negara_utama"])
     assert analisis.profil_negara(negara_tahun, konflik, "A")["tahun_puncak"] == 2004
+
+
+def test_filter_jenis_dan_wilayah_satu_teks(df_kecil):
+    hasil = analisis.filter_data(df_kecil, 2020, 2021, jenis="Konflik negara", wilayah="Asia")
+    assert len(hasil) == 2
+    assert set(hasil["negara"]) == {"A"}
