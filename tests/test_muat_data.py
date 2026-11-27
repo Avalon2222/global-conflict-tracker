@@ -88,3 +88,9 @@ def test_tahun_pecahan_ditolak():
     with pytest.raises(ValueError, match=r"tahun harus bilangan bulat, cek baris \[3\]"):
         muat_data._validasi(df, ["tahun", "korban"], "x.csv")
     muat_data._validasi(df.assign(tahun=[2024.0, 2020.0]), ["tahun", "korban"], "x.csv")
+
+
+def test_tahun_kosong_ditolak():
+    df = pd.DataFrame({"tahun": [2024, None, 2023], "korban": [5, 1, 2]})
+    with pytest.raises(ValueError, match=r"kolom tahun kosong, cek baris \[3\]"):
+        muat_data._validasi(df, ["tahun", "korban"], "x.csv")
