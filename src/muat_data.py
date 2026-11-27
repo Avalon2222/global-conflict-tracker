@@ -89,3 +89,10 @@ def _validasi(df: pd.DataFrame, kolom_wajib: list[str], nama: str) -> None:
                 if negatif.any():
                     baris = (df.index[negatif] + 2).tolist()[:5]
                     raise ValueError(f"{nama}: kolom {kolom} tidak boleh negatif, cek baris {baris}")
+    # Korban sipil adalah bagian dari total korban; kalau lebih besar, persentase korban sipil
+    # di dasbor bisa tembus di atas 100%.
+    if {"korban", "korban_sipil"} <= set(df.columns) and pd.api.types.is_numeric_dtype(df["korban_sipil"]):
+        lebih = df["korban_sipil"] > df["korban"]
+        if lebih.any():
+            baris = (df.index[lebih] + 2).tolist()[:5]
+            raise ValueError(f"{nama}: korban_sipil lebih besar dari korban, cek baris {baris}")
