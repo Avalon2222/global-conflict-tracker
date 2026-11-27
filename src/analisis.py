@@ -30,6 +30,11 @@ def filter_data(
     if tahun_awal > tahun_akhir:
         tahun_awal, tahun_akhir = tahun_akhir, tahun_awal  # rentang terbalik tetap dibaca wajar
     m = (df["tahun"] >= tahun_awal) & (df["tahun"] <= tahun_akhir)
+    # Satu teks dibaca sebagai satu pilihan, bukan deretan huruf ("Negara" -> "N", "e", ...).
+    if isinstance(jenis, str):
+        jenis = [jenis]
+    if isinstance(wilayah, str):
+        wilayah = [wilayah]
     if jenis:
         m &= df["jenis"].isin(jenis)
     if wilayah and "wilayah" in df.columns:
