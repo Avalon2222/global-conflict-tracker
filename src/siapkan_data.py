@@ -134,6 +134,12 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
     # Candidate) membuat pita ketidakpastian di grafik lebih sempit dari angka utamanya sendiri.
     out["korban_min"] = np.minimum(out["korban_min"], out["korban"])
     out["korban_max"] = np.maximum(out["korban_max"], out["korban"])
+    # Korban sipil adalah bagian dari total; kalau lebih besar (sel best kosong di rilis Candidate),
+    # muat_data menolak seluruh file dan persen sipil di dasbor tembus 100%.
+    lebih = out["korban_sipil"] > out["korban"]
+    if lebih.any():
+        print(f"  PERINGATAN: {int(lebih.sum())} kejadian korban sipil melebihi total, dibatasi", file=sys.stderr)
+        out["korban_sipil"] = np.minimum(out["korban_sipil"], out["korban"])
     # Kode kekerasan baru/tak dikenal jangan sampai jadi NaN: groupby membuang baris NaN diam-diam.
     jenis_asing = sorted(df.loc[out["jenis"].isna(), "type_of_violence"].unique().tolist())
     if jenis_asing:
