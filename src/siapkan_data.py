@@ -130,6 +130,10 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
             "status": df["status"],
         }
     )
+    # Rentang low-high yang tidak memuat best (sel high kosong jadi 0, atau low > best di rilis
+    # Candidate) membuat pita ketidakpastian di grafik lebih sempit dari angka utamanya sendiri.
+    out["korban_min"] = np.minimum(out["korban_min"], out["korban"])
+    out["korban_max"] = np.maximum(out["korban_max"], out["korban"])
     # Kode kekerasan baru/tak dikenal jangan sampai jadi NaN: groupby membuang baris NaN diam-diam.
     jenis_asing = sorted(df.loc[out["jenis"].isna(), "type_of_violence"].unique().tolist())
     if jenis_asing:
