@@ -86,7 +86,7 @@ def test_rapikan_kejadian_angka_korban_kosong(mentah):
     m.loc[1, "high"] = None
     k = siapkan_data.rapikan_kejadian(m)
     assert k.loc[0, "korban_sipil"] == 0
-    assert k.loc[1, "korban_max"] == 0
+    assert k.loc[1, "korban_max"] == 5   # high kosong: batas atas minimal sama dengan angka utama
     assert k["korban"].tolist() == [10, 5, 3, 7]
 
 
@@ -356,3 +356,13 @@ def test_rapikan_kejadian_koordinat_di_luar_jangkauan_jadi_nan(mentah):
     grid = siapkan_data.agregasi_grid(k)
     assert grid["lat"].abs().max() <= 90 and grid["lon"].abs().max() <= 180
     assert len(grid) == 2
+
+
+def test_rapikan_kejadian_rentang_korban_memuat_angka_utama(mentah):
+    mentah["high"] = mentah["high"].astype(object)
+    mentah.loc[0, "high"] = None       # sel kosong di rilis Candidate
+    mentah.loc[1, "low"] = 9           # low di atas best
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert k.loc[0, "korban_max"] == 10
+    assert k.loc[1, "korban_min"] == 5
+    assert (k["korban_min"] <= k["korban"]).all() and (k["korban"] <= k["korban_max"]).all()
