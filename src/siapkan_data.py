@@ -80,6 +80,12 @@ def _bilangan(kolom: pd.Series) -> pd.Series:
     return angka.where(np.isfinite(angka), 0).astype(int)
 
 
+def _koordinat(kolom: pd.Series, batas: float) -> pd.Series:
+    """Koordinat sebagai angka; teks rusak dan nilai di luar ±batas jadi NaN."""
+    angka = pd.to_numeric(kolom, errors="coerce")
+    return angka.where(angka.abs() <= batas)
+
+
 def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
     """Terjemahkan kode/nama UCDP ke kolom berbahasa Indonesia yang dipakai aplikasi."""
     # Baris tanpa tahun tidak bisa diletakkan di linimasa; buang dengan peringatan, jangan
@@ -113,8 +119,10 @@ def rapikan_kejadian(df: pd.DataFrame) -> pd.DataFrame:
             "pihak_a": df["side_a"],
             "pihak_b": df["side_b"],
             # Koordinat berupa teks rusak (mis. "n/a") jadi NaN, bukan menggagalkan seluruh file.
-            "lat": pd.to_numeric(df["latitude"], errors="coerce"),
-            "lon": pd.to_numeric(df["longitude"], errors="coerce"),
+            # Lintang di luar ±90 atau bujur di luar ±180 (kolom tertukar) bukan titik di Bumi;
+            # dulu lolos ke grid dan jadi titik di luar peta.
+            "lat": _koordinat(df["latitude"], 90),
+            "lon": _koordinat(df["longitude"], 180),
             "korban": _bilangan(df["best"]),
             "korban_min": _bilangan(df["low"]),
             "korban_max": _bilangan(df["high"]),

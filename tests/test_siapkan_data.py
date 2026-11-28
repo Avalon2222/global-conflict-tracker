@@ -345,3 +345,14 @@ def test_kode_kekerasan_berupa_teks_tetap_dikenali(mentah, capsys):
     k = siapkan_data.rapikan_kejadian(mentah)
     assert k["jenis"].tolist()[:3] == ["Konflik negara", "Konflik negara", "Kekerasan sepihak"]
     assert k["jenis"].iloc[3] == "Tidak diketahui"
+
+
+def test_rapikan_kejadian_koordinat_di_luar_jangkauan_jadi_nan(mentah):
+    mentah.loc[0, "latitude"] = 95.0      # lintang tertukar dengan bujur
+    mentah.loc[1, "longitude"] = -200.0
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert pd.isna(k.loc[0, "lat"]) and pd.isna(k.loc[1, "lon"])
+    assert k.loc[2, "lat"] == 34.0
+    grid = siapkan_data.agregasi_grid(k)
+    assert grid["lat"].abs().max() <= 90 and grid["lon"].abs().max() <= 180
+    assert len(grid) == 2
