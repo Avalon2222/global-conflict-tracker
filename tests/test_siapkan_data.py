@@ -366,3 +366,13 @@ def test_rapikan_kejadian_rentang_korban_memuat_angka_utama(mentah):
     assert k.loc[0, "korban_max"] == 10
     assert k.loc[1, "korban_min"] == 5
     assert (k["korban_min"] <= k["korban"]).all() and (k["korban"] <= k["korban_max"]).all()
+
+
+def test_rapikan_kejadian_korban_sipil_dibatasi_total(mentah, capsys):
+    mentah["best"] = mentah["best"].astype(object)
+    mentah.loc[2, "best"] = None       # best kosong -> 0, tetapi deaths_civilians 3
+    k = siapkan_data.rapikan_kejadian(mentah)
+    assert k.loc[2, "korban"] == 0 and k.loc[2, "korban_sipil"] == 0
+    assert k.loc[0, "korban_sipil"] == 1
+    assert (k["korban_sipil"] <= k["korban"]).all()
+    assert "korban sipil melebihi total" in capsys.readouterr().err
